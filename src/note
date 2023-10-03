@@ -1,0 +1,15 @@
+I think we should work on the fight sequence next.
+this will involve...
+creating choose a weapon function
+battle :
+choose weapon. 
+battle diaglogue :player hits or misses, monster hit or misses
+damage dialogue:damage for both moster and player will be some calculation factoring in monster and weapon level. 
+player will be shown stamina and life level and given a choice to keep fighting or run...
+
+After this we still need to program 
+figthing the dragon, 
+taking medicine, 
+the weapons shop
+
+food function needs to be debugged...
