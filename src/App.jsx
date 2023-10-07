@@ -5,17 +5,18 @@ import dragon from "./assets/dragon.png"
 import food from "./assets/food.png"
 import inventory from "./assets/inventory.png"
 import pill from "./assets/pill.png"
-import playerImg from "./assets/player.png"
+import weaponImg from "./assets/weapons.png"
 import tree from "./assets/tree.png"
 import { obj } from './logic/functions'
 import { PlayerContext } from './logic/usePlayer'
 import { TypingContext } from './logic/useTyping'
 import { fightMonster, runFromMonster } from './data/monsters'
-import { takeMeds, handleFood, findFood, findMeds } from './data/foodandMeds'
+import {handleSupply, checkSupplies } from './data/foodandMeds'
+import { WeaponDiv, weapons } from './data/weapons'
 
 function App() {
   const {player, setPlayer, playerActivity, setPlayerActivity} = useContext(PlayerContext)
-  const {text, intro, setIntro, introTracker, setIntroTracker, introOptions, typingFunction} = useContext(TypingContext)
+  const {text, setText, addText, intro, setIntro, introTracker, setIntroTracker, introOptions, typingFunction} = useContext(TypingContext)
   const [foundItem, setFoundItem] = useState("")
   const options = [{
     img:crown, 
@@ -31,7 +32,7 @@ function App() {
     img:food, 
     alt:"food", 
     hover:"Eat Food",
-    function:findFood 
+    function:checkSupplies 
   },{
     img:inventory, 
     alt:"inventory", 
@@ -41,12 +42,12 @@ function App() {
     img:pill, 
     alt:"pill", 
     hover:"Take medicine",
-    function:findMeds
+    function:checkSupplies
   },{
-    img:playerImg, 
-    alt:"player", 
-    hover:"life/ stamina",
-    function:obj.checkLife
+    img:weaponImg, 
+    alt:"weaponShop", 
+    hover:"Shop For Weapons",
+    function:obj.weaponShop
   },{
     img:tree, 
     alt:"tree", 
@@ -55,29 +56,25 @@ function App() {
   }]
   useEffect(()=>{
     if(!intro){
-      const optionsDiv = document.getElementById("optionsDiv")
-      const encounterOptions = document.getElementById("encounterOptions")
-      const foodOptions = document.getElementById("foodOptions")
-      if(playerActivity === "encounter" ||playerActivity === "running"){
-        encounterOptions.style.display = "flex"
-        optionsDiv.style.display = "none"
-      }else if(playerActivity === "foundFood"){
-        foodOptions.style.display = "flex"
-        optionsDiv.style.display = "none"
-        encounterOptions.style.display = "none"
+      const gameOptions = document.getElementById("optionsDiv")
+      const divsToFilter = document.getElementsByClassName("optionsRow")
+      const imageContainers = document.getElementsByClassName("imageContainer")
+      const arr = [...divsToFilter]
+      if(playerActivity !== ""){
+        arr.map(div=>div.getAttribute("id") === playerActivity ? div.style.display = "flex" : div.style.display = "none" )
       }else{
-        encounterOptions.style.display = "none"
-        optionsDiv.style.display = "flex"
-        foodOptions.style.display = "none"
+        arr.map(div=>div.style.display = "none" )
+        gameOptions.style.display = "flex"
       }
     }
+    console.log(playerActivity, player)
   },[playerActivity, intro])
 
   const playGame = ()=>{
     const button=document.getElementById("playButton")
     const cont = document.getElementById("continue")
     const quit = document.getElementById("quit")
-    button.remove()
+    button.style.display="none"
     typingFunction(introOptions[introTracker], true)
     setIntroTracker(1)
     cont.style.display = "block"
@@ -89,9 +86,43 @@ function App() {
     intro && setIntroTracker(prev=>prev+1)
   }
   const quitGame = ()=>{
+    const cont = document.getElementById("continue")
+    const quit = document.getElementById("quit")
     const button=document.getElementById("playButton")
-    button.remove()
-    typingFunction("Welcome...")
+    cont.style.display = "none"
+    quit.style.display = "none"
+    button.style.display = "block"
+    setText("")
+    setIntroTracker(0)
+    setPlayer({
+      name : "",
+      life : 100,
+      stamina:10,
+      inventory : {
+          weapons:[weapons.hands],
+          backpack:{medicine:[], food:[]},
+          pieces:[],
+      },
+      //game runs while this is true
+      isAlive : true,
+      //triggers monster fight
+      attackingMonster : false,
+      //triggers flee from monster fight
+      isRunning : false,
+      //allows player to/bars player from dragon fight
+      haskey : false,
+      //triggers dragon fight
+      fightingDragon: false,
+      //for shopping in and creating a weapon in the weapons shop
+      inTheShop : {
+          shopping:false,
+          making:false
+      },
+      fighting:false,
+      monsters:monsters,
+      //All players start at level one
+      level : 1
+    })
   }
 
   const handleChange = (e)=>{
@@ -108,6 +139,7 @@ function App() {
       <div id = "textbox">
         <button id = "playButton" onClick={playGame}> Play </button>
         <p> {text} </p>
+        <p> {addText} </p>
         <div id = "name">
         <input
         name = "name"
@@ -115,14 +147,14 @@ function App() {
         onChange={handleChange}/>
         <button onClick={continueGame}>Enter</button>
         </div>
-        <div id= "encounterOptions" className = "optionsRow">
+        <div id= "encounter" className = "optionsRow">
           <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
-          <button id = "fight" onClick={ fightMonster}>Fight</button>
+          <button id = "fight" onClick={()=>{typingFunction(fightMonster(player, setPlayer, setPlayerActivity), true)}}>Fight</button>
         </div>
-        <div id= "foodOptions" className = "optionsRow">
-          <button className="three" id = "inv" onClick={ ()=>{typingFunction(handleFood("inventory",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Store It</button>
-          <button className="three" id = "eat" onClick={ ()=>{typingFunction(handleFood("eat",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Eat It</button>
-          <button className="three" id = "leave" onClick={ ()=>{typingFunction(handleFood("leave",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Leave It</button>
+        <div id= "foundSupplies" className = "optionsRow">
+          <button className="mult" id = "inv" onClick={ ()=>{typingFunction(handleSupply(typingFunction,"inventory",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Store It</button>
+          <button className="mult" id = "consume" onClick={ ()=>{typingFunction(handleSupply(typingFunction,"consume",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Eat/Use It</button>
+          <button className="mult" id = "leave" onClick={ ()=>{typingFunction(handleSupply(typingFunction,"leave",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Leave It</button>
         </div>
         <div id= "medOptions" className = "optionsRow">
           <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
@@ -131,6 +163,9 @@ function App() {
         <div id= "dragonOptions" className = "optionsRow">
           <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
           <button id = "fight" onClick={ fightMonster}>Fight</button>
+        </div>
+        <div id= "chooseWeapon" className = "optionsRow" >
+          <WeaponDiv/>
         </div>
       </div>
       <div id="optionsDiv">

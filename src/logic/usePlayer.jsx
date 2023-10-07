@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { weapons } from "../data/weapons";
+import { monsters } from "../data/monsters";
 
 const PlayerContext = React.createContext()
 
@@ -6,11 +8,11 @@ const PlayerContext = React.createContext()
 function PlayerProvider(props){
     const [playerActivity, setPlayerActivity] =useState("") 
     const [player, setPlayer] = useState({
-        name : "Danielle",
+        name : "",
         life : 100,
         stamina:10,
         inventory : {
-            weapons:[],
+            weapons:[weapons.hands],
             backpack:{medicine:[], food:[]},
             pieces:[],
         },
@@ -29,6 +31,8 @@ function PlayerProvider(props){
             shopping:false,
             making:false
         },
+        fighting:false,
+        monsters:monsters,
         //All players start at level one
         level : 1
       })

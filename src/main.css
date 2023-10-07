@@ -11,12 +11,15 @@ body{
     flex-direction: column;
 }
 #textbox{
-    width: 400px;
+    width: 450px;
     margin: auto;
-    height: 200px;
+    height: 225px;
     position: relative;
     border: 4px dotted;
     background: gray;
+}
+#textbox > p{
+    margin:0
 }
 button{
     border: none;
@@ -73,6 +76,6 @@ img:hover{
  .optionsRow >  button{
     margin: 0 45px;
  }
- .optionsRow >  .three{
-    margin: 0;
+.mult{
+    margin: 0 !important;
  }

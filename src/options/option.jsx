@@ -17,17 +17,21 @@ function Option({img, alt, hover, clickFunction, setFoundItem}){
         }
     },[typingBool])
     const handleHover = (bool)=>{
-        if(bool){
-            setText(hover)
-        }else if (!playerActivity){
-            setText("Select an option")
+        if (playerActivity === ""){
+            if(bool){
+                setText(hover)
+            }else{
+                setText("Select an option")
+            }
         }
     }
 
     return(
-        <div className = "imageContainer" onClick= {()=>typingFunction(clickFunction(player, setPlayer, setPlayerActivity, setFoundItem), true)} onMouseEnter={()=>handleHover(true)} onMouseLeave={()=>handleHover(false)}>
+        <div className = "imageContainer" onClick= {()=>clickFunction(typingFunction,player, setPlayer,playerActivity, setPlayerActivity, setFoundItem, alt==="pill" ? "medicine" : alt)} onMouseEnter={()=>handleHover(true)} onMouseLeave={()=>handleHover(false)}>
             <img src={img}  alt={alt}/>
         </div>
     )
 }
+//
+//player, supply, setPlayerActivity, setPlayer,setFoundItem
 export {Option}

@@ -1,133 +1,209 @@
 const foodOptions=[
     {
+        type: "food",
         name:"bowl of ramen",
-        nutritionalValue:2,
+        benefit:2,
         loss:3,
-        yum:"Instant ramen gives you a small but instant energy boost.",
-        yuck:"Who eats instant ramen if they don't HAVE to?",
+        good:"Instant ramen gives you a small but instant energy boost.",
+        bad:"Who eats instant ramen if they don't HAVE to?",
         qnty:0
     },
     {
+        type: "food",
         name:"cup of coffee",
-        nutritionalValue:4,
+        benefit:4,
         loss:4,
-        yum:"What a blast of energy! Hury up and fight something before it wears off!",
-        yuck:"The caffine makes you jittery and gives you a panic attack, you spend hours running from your shadow.",
+        good:"What a blast of energy! Hury up and fight something before it wears off!",
+        bad:"The caffine makes you jittery and gives you a panic attack, you spend hours running from your shadow.",
         qnty:0
     },
     {
+        type: "food",
         name:"sandwhich",
-        nutritionalValue:6,
+        benefit:6,
         loss:3,
-        yum:"Just what you needed, the perfect bite to keep you going!",
-        yuck:"You feel bloated and weighed down, you look for a tree to sleep under.",
+        good:"Just what you needed, the perfect bite to keep you going!",
+        bad:"You feel bloated and weighed down, you look for a tree to sleep under.",
         qnty:0
     },
     {
+        type: "food",
         name:"three-course-dinner",
-        nutritionalValue:8,
+        benefit:8,
         loss:8,
-        yum:"A nutrious and delicous smootie. Yum!",
-        yuck:"Gluttony is a sin, heathens are generally an exhausted bunch...",
+        good:"A nutrious and delicous smootie. Yum!",
+        bad:"Gluttony is a sin, heathens are generally an exhausted bunch...",
         qnty:0
     },
     {
+        type: "food",
         name:"protien Bar",
-        nutritionalValue:10,
+        benefit:10,
         loss:0,
-        yum:"Just what you needed a blast of protien to energize you!",
-        yuck:"But I guess there's not much bad that can come from a protien bar...if you don't mind being wasteful",
+        good:"Just what you needed a blast of protien to energize you!",
+        bad:"But I guess there's not much bad that can come from a protien bar...if you don't mind being wasteful",
         qnty:0
     }
 ]
 const medOptions=[
     {
+        type: "medicine",
         name:"bandaid",
-        healthValue:10,
+        benefit:10,
         loss:0,
-        healed:"I mean...it's a bandaid...it doesn't do much but scrapes you together enough to keep pushing.",
-        sick:"Well that was wasteful",
+        good:"I mean...it's a bandaid...it doesn't do much but scrapes you together enough to keep pushing.",
+        bad:"Well that was wasteful",
         qnty:0
     },
     {
+        type: "medicine",
         name:"tylenol",
-        healthValue:20,
+        benefit:20,
         loss:20,
-        healed:"The pain in your body suddenly(in 20 minutes) fades and you walk a little lighter.",
-        sick:"The unneccessary medicine rips wholes into your stomach",
+        good:"The pain in your body suddenly(in 20 minutes) fades and you walk a little lighter.",
+        bad:"The unneccessary medicine rips wholes into your stomach",
         qnty:0
     },
     {
+        type: "medicine",
         name:"holistic diet",
-        healthValue:30,
+        benefit:30,
         loss:10,
-        healed:`Wow everything is so clean and fresh. You feel like a new person. Now to keep it up...`,
-        sick:"You spend hours huntng for the right ingrideints and preparing food and you don't feel any better for it at the end of the day.",
+        good:`Wow everything is so clean and fresh. You feel like a new person. Now to keep it up...`,
+        bad:"You spend hours huntng for the right ingrideints and preparing food and you don't feel any better for it at the end of the day.",
         qnty:0
     },
     {
+        type: "medicine",
         name:"doctor",
-        healthValue:40,
+        benefit:40,
         loss:40,
-        healed:"Just what the doctor ordered. This guy will have you up and ready to go in no time!",
-        sick:"The doctor suspects you're faking and draws blood to teach you a lesson. He took too much and now there are two of everything in front of you.",
+        good:"Just what the doctor ordered. This guy will have you up and ready to go in no time!",
+        bad:"The doctor suspects you're faking and draws blood to teach you a lesson. He took too much and now there are two of everything in front of you.",
         qnty:0
     },
     {
+        type: "medicine",
         name:"nurse",
-        healthValue:50,
+        benefit:50,
         loss:20,
-        healed:"The true backbones of the medical field, you feel better than you've felt in days!! Any dragons around?",
-        sick:"You get sick from visiting the Dr's office for no reason.",
+        good:"The true backbones of the medical field, you feel better than you've felt in days!! Any dragons around?",
+        bad:"You get bad from visiting the Dr's office for no reason.",
         qnty:0
     }
 ]
-
-const findFood=(player, setPlayer, setPlayerActivity, setFoundItem)=>{
-    setPlayerActivity("foundFood")
-    let randomFood = foodOptions[Math.floor(Math.random()*foodOptions.length)] 
-    setFoundItem(randomFood)
-    return `you find a ${randomFood.name}, your stamina is at ${player.stamina} out of 10, do you want to eat it?`
-
+const foundSpply = class{
+    constructor(type, name, benefit, loss, good, bad) {
+        this.type = type;
+        this.name = name;
+        this.benefit = benefit;
+        this.loss = loss;
+        this.good = good;
+        this.bad = bad;
+        this.found = true;
+    }
 }
-const findMeds = (player, setPlayer, setPlayerActivity, setFoundItem)=>{
-    setPlayerActivity("foundMeds")
-    let randomMed = medOptions[Math.floor(Math.random()*medOptions.length)] 
-    setFoundItem(randomMed)
-    return `you find a ${randomMed.name}, your life is at ${player.life} out of 10o, do you want to use it?`
+const foundSuppiles = [
+    new foundSpply("food", "wild berry", 3, 3, "Wow, wild strawberries, what a find!", "don't you know not to eat wild berries???"), 
+    new foundSpply("food", "wild mushroom", 1, 8, "Well, you're not sure you feel more energized, but you definitely feel something...at least they weren't poisonous", "wild mushrooms are super posionous, why would you eat that???"), 
+    new foundSpply("food", "pile of garbage", 2, 8, "Gross, I guess something is better than nothing!", "gross, you can't stop vomitting."), 
+    new foundSpply("food", "pig roasting over a fire", 10, 10, "Finders keepers losers weepers, what a find!", "The owner caught you touching their pig and chased you away."),
+    new foundSpply("med", "berries", 10, 10, "Wow, wild strawberries, what a find!", "don't you know not to eat wild berries???"), 
+    new foundSpply("medicine", "lake", 20, 40, "Just what you needed, the refreshing drink rejuvenates you.", "You get a virus from drinking contaminated water."),
+    new foundSpply("medicine", "man claiming to be a doctor", 50, 50, "He patches you up and you feel better than ever.", "He steals your liver."), 
+    new foundSpply("medicine", "puddle of mud", 10, 30, "The mud seals your wounds and your able to move a little easier.", "You get an infection from putting dirt in your wounds."), 
+    new foundSpply("medicine", "needle and thread", 30, 40, "You manage to close the worst of your wounds, good job doc!", "You're not a doctor. You make matters much worse.")
+]
+const checkSupplies = (typingFunction, player , setPlayer,playerActivity, setPlayerActivity, setFoundItem, supply)=>{
+    const inventory =player.inventory.backpack[supply]
+    const supplyObj = supply === "food"? {type:"stamina", verb:"eat", value:"10"} : {type:"life", verb:"use", value:"100"}
+    if(inventory.length>0){
+        const randomSupply = inventory[Math.floor(Math.random()*inventory.length)]
+        const newSupplyArray = inventory.filter(item=>item.name !==randomSupply.name)
+        setPlayer(prevPlayer=>({...prevPlayer, inventory:{...prevPlayer.inventory, backpack:{...prevPlayer.inventory.backpack, [supply]:newSupplyArray}}}))
+        setPlayerActivity("foundSupplies")
+        setFoundItem(randomSupply)
+        typingFunction( ` You pull a ${randomSupply.name} from your inventory. Your ${supplyObj.type} is at ${player[supplyObj.type]} out of ${supplyObj.value} Do you want to ${supplyObj.verb} it?`, true)
+    }else{
+        setPlayerActivity("foundSupplies")
+        const randomSupplies = foundSuppiles.filter(sply=>sply.type===supply)
+        const randomSupply = randomSupplies[Math.floor(Math.random()*randomSupplies.length)]
+        setFoundItem(randomSupply)
+        typingFunction( `You don't have any ${supply} your inventory, but you look around and find a ${randomSupply.name}. Do you want to ${supplyObj.verb} it`, true)
+    }
 }
-const handleFood=(choice, food, player,setPlayer, setPlayerActivity)=>{
+
+const findFood=(player, setPlayer,playerActivity, setPlayerActivity, setFoundItem, bool)=>{
+    if(playerActivity=== ""){
+        setPlayerActivity("foundSupplies")
+        let randomFood = foodOptions[Math.floor(Math.random()*foodOptions.length)] 
+        setFoundItem(randomFood)
+        const storeIt = document.getElementById("inv")
+        storeIt.disabled = false
+        return`you find a ${randomFood.name}, your stamina is at ${player.stamina} out of 10, what would you like to do?`
+    }
+}
+const findMeds = (player, setPlayer,playerActivity, setPlayerActivity, setFoundItem)=>{
+    if(playerActivity=== ""){
+        setPlayerActivity("foundSupplies")
+        let randomMed = medOptions[Math.floor(Math.random()*medOptions.length)] 
+        setFoundItem(randomMed)
+        const storeIt = document.getElementById("inv")
+        storeIt.disabled = false
+        return`you find a ${randomMed.name}, your life is at ${player.life} out of 10, What would you like to do?`
+    }
+}
+const handleSupply=(typingFunction, choice, supply, player,setPlayer, setPlayerActivity)=>{
     setPlayerActivity("")
-    if(choice === "eat"){
-        if(player.stamina ===10){
-            setPlayer(prev=>({...prev, stamina:prev.stamina - food.loss < 0 ? 0 : prev.stamina - food.loss}))
-            player.stamina = player.stamina - food.loss < 0 ? 0 : player.stamina - food.loss
-            return `You feel well rested, but decide to eat anyway. ${food.yuck}. You lose ${food.loss} stamina points and now have ${player.stamina} stamina points out of 10.`
+    if(choice === "consume"){
+        if(supply.type==="food"){
+            let possibleLoss = player.stamina - supply.loss < 0 ? 0 : player.stamina - supply.loss
+            let possibleGain = player.stamina + supply.benefit > 10 ? 10 : player.stamina + supply.benefit
+            if(player.stamina >=7){
+                setPlayer(prev=>({...prev, stamina:possibleLoss}))
+                typingFunction (`You feel well rested, but decide to eat anyway. ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`, true)
+            }else{
+                if(supply.found){
+                    if(Math.floor(Math.random()*2)>0){
+                        setPlayer(prev=>({...prev, stamina:possibleLoss}))
+                        typingFunction(`You're desperate. You eat the ${supply.name}, ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`,true)
+                    }else{
+                        setPlayer(prev=>({...prev, stamina:possibleGain}))
+                        typingFunction(`You're desperate. You eat the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} stamina points and now have ${possibleGain} stamina points out of 10.`,true)
+                    }
+                }else{
+                    setPlayer(prev=>({...prev, stamina:prev.stamina + supply.benefit > 10 ? 10 : prev.stamina + supply.benefit}))
+                    player.stamina = player.stamina + supply.benefit > 10 ? 10 : player.stamina + supply.benefit
+                    typingFunction (`You eat the ${supply.name} ${supply.good}. You gain ${supply.benefit} stamina points. Your new stamina is ${player.stamina} out of 10`, true)
+                }
+            }
         }else{
-            setPlayer(prev=>({...prev, stamina:prev.stamina + food.nutritionalValue > 10 ? 10 : prev.stamina + food.nutritionalValue}))
-            player.stamina = player.stamina + food.nutritionalValue > 10 ? 10 : player.stamina + food.nutritionalValue
-            return `You eat the ${food.name} ${food.yum}. You gain ${food.nutritionalValue} stamina points. Your new stamina is ${player.stamina} out of 10`
+            let possibleLoss = player.life - supply.loss < 0 ? 0 : player.life - supply.loss
+            let possibleGain = player.life + supply.benefit > 100 ? 100 : player.life + supply.benefit
+            if(player.life >=75){
+                setPlayer(prev=>({...prev, life:possibleLoss}))
+                typingFunction (`You feel healthy, but decide to use the ${supply.name} anyway. ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`, true)
+            }else{
+                if(supply.found){
+                    if(Math.floor(Math.random()*2)>0){
+                        setPlayer(prev=>({...prev, life:possibleLoss}))
+                        typingFunction(`You're desperate. You use the ${supply.name}, ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`,true)
+                    }else{
+                        setPlayer(prev=>({...prev, life:possibleGain}))
+                        typingFunction(`You're desperate. You eat the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} stamina points and now have ${possibleGain} stamina points out of 10.`,true)
+                    }
+                }else{
+                    player.life = player.life + supply.benefit > 10 ? 10 : player.life + supply.benefit
+                    setPlayer(prev=>({...prev, life:player.life}))
+                    typingFunction (`You use the ${supply.name} ${supply.good}. You gain ${supply.benefit} life points. Your new life is ${player.life} out of 100`, true)
+                }
+            }
         }
     }else if(choice === "leave"){
-        return`...you know you have an inventory right...we always get the bright ones...`
+        typingFunction(`...you know you have an inventory right...we always get the bright ones...`, true)
     }else{
-        setPlayer(prev=>({...prev, inventory:{...prev.inventory, food:[...prev.inventory.food, food]}}))
-        return`Ok, it's in your inventory!`
-    }
-
-
-
-}
-const takeMeds = (med, player, setPlayer, setPlayerActivity)=>{
-    setPlayerActivity("")
-    if(player.stamina ===100){
-        setPlayer(prev=>({...prev, life:prev.life - randomMed.loss > 100 ? 100 : prev.life - randomMed.loss}))
-        player.life = player.life + randomMed.healthValue > 100 ? 100 : player.life + randomMed.healthValue
-        return `Your perfectly healthy, but you use the ${med.name} ${med.sick} You lose ${med.loss} life points and now have ${player.life} life points out of 100.`
-    }else{
-        setPlayer(prev=>({...prev, life:prev.life + randomMed.healthValue > 100 ? 100 : prev.life + randomMed.healthValue}))
-        player.life = player.life + randomMed.healthValue > 100 ? 100 : player.life + randomMed.healthValue
-        return `You use the ${med.name} ${med.healed}. You gain ${randomMed.healthValue} life points. Your new life is ${player.life} out of 100`
+        setPlayer(prev=>({...prev, inventory:{...prev.inventory, food:[...prev.inventory.food, supply]}}))
+        typingFunction(`Ok, it's in your inventory!`, true)
     }
 }
-export{foodOptions, medOptions, findFood, findMeds, handleFood, takeMeds}
+export{foodOptions, medOptions, findFood, findMeds, handleSupply, checkSupplies}

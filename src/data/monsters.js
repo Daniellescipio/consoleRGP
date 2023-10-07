@@ -7,17 +7,17 @@ const levels = {
     
 }
 const monsters = []
-const firebBreathingDragon= {
+const fireBreathingDragon= {
     name : "the Fire Breathing Dragon",
     life : 50,
     level : 5,
     dodge:["soars into the air", "flaps its wings, knocking your weapong out of your hand", "breathes fire", "turns it's scaly back to you", "runs"],
-    hit:["crashes to the floor", "raoars in pain", "hisses", "cries"],
+    hit:["crashes to the floor", "roars in pain", "hisses", "cries"],
     attack:["swats you acroos the room with it's tail", "releases a fireball", "creates a wind storm with it's wings", "bites you"],
     finishingMove:"unlatches it's jaws and releases an inferno",
     winphrase:"RAH RAH, I'M A DUNGEON DRAGON!",
     losePhrase: "You're power is too great for me!",
-    prizeForDefeat: weapons.key,   
+    prizeForDefeat: 13,   
 }
 const banditOne ={
     name : "the bandit",
@@ -29,7 +29,7 @@ const banditOne ={
     finishingMove:"Kicks you in the face",
     winPhrase:"You're TOO LATE",
     losePhrase:"Aww man!",
-    prizeForDefeat : weaponPieces.wood,
+    prizeForDefeat : 1,
 
 }
 const bully ={
@@ -42,7 +42,7 @@ const bully ={
     finishingMove:"Kicks you in the face",
     winPhrase:"Give me your lunch money",
     losePhrase:"I'm telling my mom",
-    prizeForDefeat : weaponPieces.metal,
+    prizeForDefeat : 2,
 }
 const bigFoot ={
     name : "Big Foot",
@@ -54,7 +54,7 @@ const bigFoot ={
     finishingMove:"steps on you",
     winPhrase:"FE FI FO FUM ",
     losePhrase:"This is why no one believes in me!",
-    prizeForDefeat : weaponPieces.blade,
+    prizeForDefeat : 3,
 }
 const cyclops ={
     name : "the cyclops",
@@ -66,7 +66,7 @@ const cyclops ={
     finishingMove:"Eats you",
     winPhrase:"EYE got my EYE on you!",
     losePhrase:"EYE don't SEE the point in continuing!",
-    prizeForDefeat : weaponPieces.crossgaurd,
+    prizeForDefeat : 4,
 }
 const batMan ={
     name : "BatMan",
@@ -78,7 +78,7 @@ const batMan ={
     finishingMove:"Karate chops you in the throat",
     winPhrase:"I'm Batman",
     losePhrase:"I'm Batman",
-    prizeForDefeat : weaponPieces.pommel,
+    prizeForDefeat : 5,
 }    
 const evilKnight={
     name : "the Evil Knight",
@@ -90,7 +90,7 @@ const evilKnight={
     finishingMove:"stabs you with his sword",
     winPhrase:"That will be SIR knight to you!",
     losePhrase:"wait! I'm a good knight now!!",
-    prizeForDefeat : weaponPieces.laser,
+    prizeForDefeat : 6,
 }
 const vampire={
     name : "the Vampire",
@@ -102,7 +102,7 @@ const vampire={
     finishingMove:"sinks his fangs into your neck",
     winPhrase: "*Something about drinking your blood*",
     losePhrase: "Can't I have just a SIP!",
-    prizeForDefeat : weaponPieces.action,
+    prizeForDefeat : 7,
 }
 const werewolf={
     name : "the werewolf",
@@ -114,7 +114,7 @@ const werewolf={
     finishingMove:"bites you, now you're a werewolf",
     winPhrase:"Looks like it's a full moon",
     losePhrase:"AOoooooooooooo",
-    prizeForDefeat : weaponPieces.barrel,
+    prizeForDefeat : 8,
 }
 const ninja={
     name : "the ninja",
@@ -126,7 +126,7 @@ const ninja={
     finishingMove:"You blink so you miss it...",
     winPhrase:"Nothing. They are to stealthy for words",
     losePhrase:"FUCK",
-    prizeForDefeat : weaponPieces.stock,
+    prizeForDefeat : 9,
 }    
 const teminator={
     name : "The Terminator",
@@ -138,7 +138,7 @@ const teminator={
     finishingMove:"Shoots at you with an arm cannon",
     winPhrase:"You're about to be terminated",
     losePhrase:"I'll be back",
-    prizeForDefeat : weaponPieces.holly,   
+    prizeForDefeat : 10,   
 }
 const hades={
     name : "Hades",
@@ -150,7 +150,7 @@ const hades={
     finishingMove:"opens a pit to hell beneath your feet",
     winPhrase:"I'm fired up now!!",
     losePhrase:"I left hell for THIS?!",
-    prizeForDefeat : weaponPieces.pheonixFeather,    
+    prizeForDefeat : 11,    
 }
 const wickedWitch={
     name : "The Wicked Witch of Sciptopia",
@@ -162,7 +162,7 @@ const wickedWitch={
     finishingMove:"turns you into a frog",
     winPhrase:"Now I've got you, my pretty",
     losePhrase:"I'm meeelllltttttinnnngggg",
-    prizeForDefeat : weaponPieces.garrickOllivander,    
+    prizeForDefeat : 12,    
 }
 const vader={
     name : "Velociraptor",
@@ -174,29 +174,31 @@ const vader={
     finishingMove:"Eats you",
     winPhrase:"RAWWWRRRRRRRR",
     losePhrase:"raaaawwwwwrrrrr",
-    prizeForDefeat : weaponPieces.magic,
+    prizeForDefeat : 13,
 }
 
-monsters.push(banditOne,bully, bigFoot, batMan, cyclops, evilKnight, vampire, werewolf,ninja,teminator,hades,vader, wickedWitch)
+monsters.push(banditOne, bully, bigFoot, batMan, cyclops, evilKnight, vampire, werewolf,ninja,teminator,hades,vader, wickedWitch)
 levels.levelOne = monsters.filter(monster=>monster.level === 1)
 levels.levelTwo = monsters.filter(monster=>monster.level === 2)
 levels.levelThree = monsters.filter(monster=>monster.level === 3)
 levels.levelFour = monsters.filter(monster=>monster.level === 4)
 
-function fightMonster(){
-    return ' '
+function fightMonster(player, setPlayer, setPlayerActivity){
+    setPlayerActivity("chooseWeapon")
+    return 'Choose Your weapon'
 }
 function runFromMonster(player, setPlayer, setPlayerActivity){
-    setPlayerActivity("running")
     let stamLoss=Math.floor(((Math.random()*(15-5))+5)/player.stamina)
     let random = Math.floor(Math.random()* player.stamina)
     if(random< 3 || player.stamina <5){
         setPlayer(prev=>({...prev, stamina:prev.stamina - stamLoss < 0 ? 0 : prev.stamina - stamLoss}))
         player.stamina = player.stamina - stamLoss
         if(player.stamina <5){
+            setPlayerActivity("")
             return `Your stamina is low, you stumble and fall costing you ${stamLoss} points. Will you keep running or stand and fight!`
         }else{
-            return `You ran as fast as you could, but being a coward is tiring. So you only make it a few steps before you're eshausted, you lose ${stamLoss} stamina point(s). Will you keep running or stand and fight!`
+            setPlayerActivity("encounter")
+            return `You ran as fast as you could, but being a coward is tiring. So you only make it a few steps before you're exhausted, you lose ${stamLoss} stamina point(s). Will you keep running or stand and fight!`
         }
     }else{
         setPlayerActivity("")
@@ -205,4 +207,4 @@ function runFromMonster(player, setPlayer, setPlayerActivity){
 }
 
 
-export {monsters, levels, fightMonster, runFromMonster}
+export {monsters, levels, fightMonster, runFromMonster, fireBreathingDragon}
