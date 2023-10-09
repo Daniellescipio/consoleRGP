@@ -194,15 +194,26 @@ function runFromMonster(player, setPlayer, setPlayerActivity){
         setPlayer(prev=>({...prev, stamina:prev.stamina - stamLoss < 0 ? 0 : prev.stamina - stamLoss}))
         player.stamina = player.stamina - stamLoss
         if(player.stamina <5){
-            setPlayerActivity("")
+            setPlayerActivity("encounter")
             return `Your stamina is low, you stumble and fall costing you ${stamLoss} points. Will you keep running or stand and fight!`
         }else{
-            setPlayerActivity("encounter")
-            return `You ran as fast as you could, but being a coward is tiring. So you only make it a few steps before you're exhausted, you lose ${stamLoss} stamina point(s). Will you keep running or stand and fight!`
+            if(player.fighting.level>player.level){
+                setPlayerActivity("")
+                return `Good choice, you're not quite ready to fight the ${player.fighting.name}.`
+            }else{
+                setPlayerActivity("encounter")
+                return `You ran as fast as you could, but being a coward is tiring. So you only make it a few steps before you're exhausted, you lose ${stamLoss} stamina point(s). Will you keep running or stand and fight!`
+            }
         }
     }else{
-        setPlayerActivity("")
-        return "You got Away!"
+        if(player.fighting.level===player.level){
+            setPlayerActivity("encounter")
+            return `You ran as fast as you could, but being a coward is tiring. So you only make it a few steps before you're exhausted, you lose ${stamLoss} stamina point(s). Will you keep running or stand and fight!`
+        }else{
+            setPlayerActivity("")
+            return "You got Away!"
+        }
+
     }
 }
 

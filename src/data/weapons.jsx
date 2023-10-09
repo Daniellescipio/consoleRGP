@@ -5,7 +5,7 @@ import wand from "../assets/wand.png"
 import swordimg from "../assets/sword.png"
 import keyimg from "../assets/key.png"
 import { PlayerContext } from "../logic/usePlayer"
-import { useContext } from "react"
+import { useContext, useEffect, useState } from "react"
 import { TypingContext } from "../logic/useTyping"
 import { obj } from "../logic/functions"
 const weaponPieces = {
@@ -135,15 +135,13 @@ const weapons ={
 }
 function WeaponDiv({}){
     const {player, playerActivity, setPlayer, setPlayerActivity} = useContext(PlayerContext)
-    const {typingFunction, setText} = useContext(TypingContext)
+    const {typingFunction, setAddText} = useContext(TypingContext)
+
     const handleHover = (bool, weapon)=>{
         if(bool){
-            typingFunction("")
-            setText(`\n ${weapon.Definition}`)
-        }else if (playerActivity==="fightMonster"){
-            console.log(playerActivity)
-            typingFunction("", true)
-            setText("Choose a weapon")
+            setAddText(`${weapon.Definition}`)
+        }else{
+            setAddText("")
         }
     }
     const weaponsArray = [weapons.axe,weapons.hands,weapons.sword,weapons.magicWand, weapons.laserGun]

@@ -21,6 +21,9 @@ body{
 #textbox > p{
     margin:0
 }
+.additionalText{
+    color: blanchedalmond;
+}
 button{
     border: none;
     background-color: transparent;

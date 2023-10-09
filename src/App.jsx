@@ -10,13 +10,13 @@ import tree from "./assets/tree.png"
 import { obj } from './logic/functions'
 import { PlayerContext } from './logic/usePlayer'
 import { TypingContext } from './logic/useTyping'
-import { fightMonster, runFromMonster } from './data/monsters'
+import { fightMonster, runFromMonster, monsters } from './data/monsters'
 import {handleSupply, checkSupplies } from './data/foodandMeds'
 import { WeaponDiv, weapons } from './data/weapons'
 
 function App() {
   const {player, setPlayer, playerActivity, setPlayerActivity} = useContext(PlayerContext)
-  const {text, setText, addText, intro, setIntro, introTracker, setIntroTracker, introOptions, typingFunction} = useContext(TypingContext)
+  const {text, setText, setAddText, addText, intro, setIntro, introTracker, setIntroTracker, introOptions, typingFunction} = useContext(TypingContext)
   const [foundItem, setFoundItem] = useState("")
   const options = [{
     img:crown, 
@@ -67,6 +67,7 @@ function App() {
         gameOptions.style.display = "flex"
       }
     }
+    setAddText("")
     console.log(playerActivity, player)
   },[playerActivity, intro])
 
@@ -75,14 +76,14 @@ function App() {
     const cont = document.getElementById("continue")
     const quit = document.getElementById("quit")
     button.style.display="none"
-    typingFunction(introOptions[introTracker], true)
+    typingFunction("text", introOptions[introTracker], true)
     setIntroTracker(1)
     cont.style.display = "block"
     quit.style.display = "contents"
     setIntro(true)
   }
   const continueGame = ()=>{
-    typingFunction(introOptions[introTracker], true)
+    typingFunction("text", introOptions[introTracker], true)
     intro && setIntroTracker(prev=>prev+1)
   }
   const quitGame = ()=>{
@@ -139,7 +140,7 @@ function App() {
       <div id = "textbox">
         <button id = "playButton" onClick={playGame}> Play </button>
         <p> {text} </p>
-        <p> {addText} </p>
+        <p className="additionalText"> {addText} </p>
         <div id = "name">
         <input
         name = "name"
@@ -148,22 +149,22 @@ function App() {
         <button onClick={continueGame}>Enter</button>
         </div>
         <div id= "encounter" className = "optionsRow">
-          <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
-          <button id = "fight" onClick={()=>{typingFunction(fightMonster(player, setPlayer, setPlayerActivity), true)}}>Fight</button>
+          <button id = "run" onClick={()=>{typingFunction("text", runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
+          <button id = "fight" onClick={()=>{typingFunction("text", fightMonster(player, setPlayer, setPlayerActivity), true)}}>Fight</button>
         </div>
         <div id= "foundSupplies" className = "optionsRow">
-          <button className="mult" id = "inv" onClick={ ()=>{typingFunction(handleSupply(typingFunction,"inventory",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Store It</button>
-          <button className="mult" id = "consume" onClick={ ()=>{typingFunction(handleSupply(typingFunction,"consume",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Eat/Use It</button>
-          <button className="mult" id = "leave" onClick={ ()=>{typingFunction(handleSupply(typingFunction,"leave",foundItem, player, setPlayer, setPlayerActivity, setFoundItem), true)}}>Leave It</button>
+          <button className="mult" id = "inv" onClick={()=>handleSupply(typingFunction,"inventory",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Store It</button>
+          <button className="mult" id = "consume" onClick={()=>handleSupply(typingFunction,"consume",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Eat/Use It</button>
+          <button className="mult" id = "leave" onClick={()=>handleSupply(typingFunction,"leave",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Leave It</button>
         </div>
-        <div id= "medOptions" className = "optionsRow">
+        {/* <div id= "medOptions" className = "optionsRow">
           <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
           <button id = "fight" onClick={ fightMonster}>Fight</button>
         </div>
         <div id= "dragonOptions" className = "optionsRow">
           <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
           <button id = "fight" onClick={ fightMonster}>Fight</button>
-        </div>
+        </div> */}
         <div id= "chooseWeapon" className = "optionsRow" >
           <WeaponDiv/>
         </div>

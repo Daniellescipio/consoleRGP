@@ -123,13 +123,17 @@ const checkSupplies = (typingFunction, player , setPlayer,playerActivity, setPla
         setPlayer(prevPlayer=>({...prevPlayer, inventory:{...prevPlayer.inventory, backpack:{...prevPlayer.inventory.backpack, [supply]:newSupplyArray}}}))
         setPlayerActivity("foundSupplies")
         setFoundItem(randomSupply)
-        typingFunction( ` You pull a ${randomSupply.name} from your inventory. Your ${supplyObj.type} is at ${player[supplyObj.type]} out of ${supplyObj.value} Do you want to ${supplyObj.verb} it?`, true)
+        const storeIt = document.getElementById("inv")
+        storeIt.disabled = false
+        typingFunction("addText", ` You pull a ${randomSupply.name} from your inventory. Your ${supplyObj.type} is at ${player[supplyObj.type]} out of ${supplyObj.value} Do you want to ${supplyObj.verb} it?`, true)
     }else{
         setPlayerActivity("foundSupplies")
         const randomSupplies = foundSuppiles.filter(sply=>sply.type===supply)
         const randomSupply = randomSupplies[Math.floor(Math.random()*randomSupplies.length)]
         setFoundItem(randomSupply)
-        typingFunction( `You don't have any ${supply} your inventory, but you look around and find a ${randomSupply.name}. Do you want to ${supplyObj.verb} it`, true)
+        const storeIt = document.getElementById("inv")
+        storeIt.disabled = true
+        typingFunction( "addText", `You don't have any ${supply} your inventory, but you look around and find a ${randomSupply.name}. Do you want to ${supplyObj.verb} it`, true)
     }
 }
 
@@ -138,8 +142,6 @@ const findFood=(player, setPlayer,playerActivity, setPlayerActivity, setFoundIte
         setPlayerActivity("foundSupplies")
         let randomFood = foodOptions[Math.floor(Math.random()*foodOptions.length)] 
         setFoundItem(randomFood)
-        const storeIt = document.getElementById("inv")
-        storeIt.disabled = false
         return`you find a ${randomFood.name}, your stamina is at ${player.stamina} out of 10, what would you like to do?`
     }
 }
@@ -148,8 +150,6 @@ const findMeds = (player, setPlayer,playerActivity, setPlayerActivity, setFoundI
         setPlayerActivity("foundSupplies")
         let randomMed = medOptions[Math.floor(Math.random()*medOptions.length)] 
         setFoundItem(randomMed)
-        const storeIt = document.getElementById("inv")
-        storeIt.disabled = false
         return`you find a ${randomMed.name}, your life is at ${player.life} out of 10, What would you like to do?`
     }
 }
@@ -159,51 +159,70 @@ const handleSupply=(typingFunction, choice, supply, player,setPlayer, setPlayerA
         if(supply.type==="food"){
             let possibleLoss = player.stamina - supply.loss < 0 ? 0 : player.stamina - supply.loss
             let possibleGain = player.stamina + supply.benefit > 10 ? 10 : player.stamina + supply.benefit
-            if(player.stamina >=7){
+            if(player.stamina ===10){
                 setPlayer(prev=>({...prev, stamina:possibleLoss}))
-                typingFunction (`You feel well rested, but decide to eat anyway. ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`, true)
+                typingFunction ("text", `You feel well rested, but decide to eat anyway. ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`, true)
             }else{
                 if(supply.found){
-                    if(Math.floor(Math.random()*2)>0){
+                    if(Math.floor(Math.random()*101)>player.life){
                         setPlayer(prev=>({...prev, stamina:possibleLoss}))
-                        typingFunction(`You're desperate. You eat the ${supply.name}, ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`,true)
+                        typingFunction("text", `You're desperate. You eat the ${supply.name}, ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`,true)
                     }else{
                         setPlayer(prev=>({...prev, stamina:possibleGain}))
-                        typingFunction(`You're desperate. You eat the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} stamina points and now have ${possibleGain} stamina points out of 10.`,true)
+                        typingFunction("text", `You're desperate. You eat the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} stamina points and now have ${possibleGain} stamina points out of 10.`,true)
                     }
                 }else{
-                    setPlayer(prev=>({...prev, stamina:prev.stamina + supply.benefit > 10 ? 10 : prev.stamina + supply.benefit}))
-                    player.stamina = player.stamina + supply.benefit > 10 ? 10 : player.stamina + supply.benefit
-                    typingFunction (`You eat the ${supply.name} ${supply.good}. You gain ${supply.benefit} stamina points. Your new stamina is ${player.stamina} out of 10`, true)
+                    if(Math.floor(Math.random()*101)>player.life){
+                        setPlayer(prev=>({...prev, stamina:possibleLoss}))
+                        typingFunction("text", `You eat the ${supply.name}, ${supply.bad}. You lose ${supply.loss} stamina points and now have ${possibleLoss} stamina points out of 10.`,true)
+                    }else{
+                        setPlayer(prev=>({...prev, stamina:possibleGain}))
+                        typingFunction ("text", `You eat the ${supply.name} ${supply.good}. You gain ${supply.benefit} stamina points. Your new stamina is ${possibleGain} out of 10`, true)
+                    }
+
                 }
             }
         }else{
             let possibleLoss = player.life - supply.loss < 0 ? 0 : player.life - supply.loss
             let possibleGain = player.life + supply.benefit > 100 ? 100 : player.life + supply.benefit
-            if(player.life >=75){
+            if(player.life ===100){
                 setPlayer(prev=>({...prev, life:possibleLoss}))
-                typingFunction (`You feel healthy, but decide to use the ${supply.name} anyway. ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`, true)
+                typingFunction ("text", `You feel healthy, but decide to use the ${supply.name} anyway. ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`, true)
             }else{
                 if(supply.found){
-                    if(Math.floor(Math.random()*2)>0){
+                    if(Math.floor(Math.random()*101)>player.life){
                         setPlayer(prev=>({...prev, life:possibleLoss}))
-                        typingFunction(`You're desperate. You use the ${supply.name}, ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`,true)
+                        typingFunction("text", `You're desperate. You use the ${supply.name}, ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`,true)
                     }else{
                         setPlayer(prev=>({...prev, life:possibleGain}))
-                        typingFunction(`You're desperate. You eat the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} stamina points and now have ${possibleGain} stamina points out of 10.`,true)
+                        typingFunction("text", `You're desperate. You eat the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} stamina points and now have ${possibleGain} stamina points out of 10.`,true)
                     }
                 }else{
-                    player.life = player.life + supply.benefit > 10 ? 10 : player.life + supply.benefit
-                    setPlayer(prev=>({...prev, life:player.life}))
-                    typingFunction (`You use the ${supply.name} ${supply.good}. You gain ${supply.benefit} life points. Your new life is ${player.life} out of 100`, true)
+                    if(Math.floor(Math.random()*101)>player.life){
+                        setPlayer(prev=>({...prev, life:possibleLoss}))
+                        typingFunction("text", ` You use the ${supply.name}, ${supply.bad}. You lose ${supply.loss} life points and now have ${possibleLoss} life points out of 100.`,true)
+                    }else{
+                        setPlayer(prev=>({...prev, life:player.life}))
+                        typingFunction ("text", `You use the ${supply.name} ${supply.good}. You gain ${supply.benefit} life points. Your new life is ${possibleGain} out of 100`, true)
+                    }
+
                 }
             }
         }
     }else if(choice === "leave"){
-        typingFunction(`...you know you have an inventory right...we always get the bright ones...`, true)
+        if(supply.found){
+            typingFunction("text", `You're smarter than you let on...`, true)
+        }else{
+            typingFunction("text", `...you know you have an inventory right...we always get the bright ones...`, true)
+        }
     }else{
-        setPlayer(prev=>({...prev, inventory:{...prev.inventory, food:[...prev.inventory.food, supply]}}))
-        typingFunction(`Ok, it's in your inventory!`, true)
+        if(supply.found){
+            setPlayerActivity("foundSupplies")
+            typingFunction("addText", `I don't think that's a good idea...`, true)
+        }else{
+            setPlayer(prev=>({...prev, inventory:{...prev.inventory, backpack:{...prev.inventory.backpack, [supply.type]:[...prev.inventory.backpack[supply.type],supply]}}}))
+            typingFunction("text", `Ok, it's in your inventory!`, true)
+        }
     }
 }
 export{foodOptions, medOptions, findFood, findMeds, handleSupply, checkSupplies}

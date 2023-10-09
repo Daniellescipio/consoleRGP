@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { weapons } from "../data/weapons";
+import { weaponPieces, weapons } from "../data/weapons";
 import { monsters } from "../data/monsters";
 
 const PlayerContext = React.createContext()
