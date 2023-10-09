@@ -1,26 +1,107 @@
-import { useContext } from "react"
-import { monsters, levels } from "../data/monsters"
-import { weaponPieces, weapons } from "../data/weapons"
-import {findFood, findMeds, foodOptions, medOptions } from "../data/foodandMeds"
-import { fireBreathingDragon } from "../data/monsters"
+import {weaponPieces} from "../data/weapons"
+import {supplies} from "../data/foodandMeds"
+import {fireBreathingDragon} from "../data/monsters"
+//Inventory
 const checkInv = (typingFunction, player, setPlayer,playerActivity, setPlayerActivity,)=>{
     let inventory = player.inventory
-    const weaponsCheck = inventory.weapons.length>0?inventory.weapons.map(weapon=>weapon.name):"no weapons"
-    const foodCheck=inventory.backpack.food.length>0?inventory.backpack.food.map(food=>food.name):"no food"
-    const medCheck = inventory.backpack.medicine.length>0?inventory.backpack.medicine.map(medicine=>medicine.name):"no medicine"
-    const pieceCheck = inventory.pieces.length>0?inventory.pieces.map((piece,i)=>` a ${piece.name}${i===inventory.pieces.length-1 ? ".":","}`):"no weapon pieces"
+    const weaponsCheck = inventory.weapons.length>0?inventory.weapons.map(weapon=>`${i===inventory.weapons.length-1 ? `and a ${weapon.name}.`:` a ${weapon.name},`}`):"no weapons"
+    const foodCheck=inventory.backpack.food.length>0?inventory.backpack.food.map(food=>`${i===inventory.backpack.food.length-1 ? `and a ${food.name}.`:` a ${food.name},`}`):"no food"
+    const medCheck = inventory.backpack.medicine.length>0?inventory.backpack.medicine.map(medicine=>`${i===inventory.backpack.medicine.length-1 ? `and a ${medicine.name}.`:` a ${medicine.name},`}`):"no medicine"
+    const pieceCheck = inventory.pieces.length>0?inventory.pieces.map((piece,i)=>`${i===inventory.pieces.length-1 ? `and a ${piece.name}.`:` a ${piece.name},`}`):"no weapon pieces"
     if(playerActivity === "fightMonster"){
-        typingFunction ("addText", `\n Weapons: ${weaponsCheck}, \n Food:${foodCheck},\n  Medicine: ${medCheck}`, true)
+        typingFunction ("addText", `Weapons: ${weaponsCheck}, Food:${foodCheck}, Medicine: ${medCheck}`, true)
     }else{
         setPlayerActivity("checking")
-        typingFunction ("text", `\n Weapons: ${weaponsCheck}, \n Food:${foodCheck},\n  Medicine: ${medCheck}, \n Weapons pieces: ${pieceCheck},\n life: ${player.life}/100 stamina: ${player.stamina}/10. `, true, "checking")
+        typingFunction ("text", ` Weapons: ${weaponsCheck}, Food:${foodCheck}, Medicine: ${medCheck}, Weapons pieces: ${pieceCheck}, life: ${player.life}/100 stamina: ${player.stamina}/10. `, true, "checking")
     }
 }
+
+//functions for food and Medicine 
+const checkSupplies = (typingFunction, player , setPlayer,playerActivity, setPlayerActivity, setFoundItem, supply)=>{
+    let str
+    const inventory =player.inventory.backpack[supply]
+    let randomSupply
+    if(inventory.length>0){
+        randomSupply = inventory[Math.floor(Math.random()*inventory.length)]
+        const storeIt = document.getElementById("inv")
+        storeIt.disabled = false
+        str = ` You pull a ${randomSupply.name} from your inventory. Your ${randomSupply.affectedObj.affected} is at ${player[randomSupply.affectedObj.affected]} out of ${randomSupply.affectedObj.value} Do you want to ${randomSupply.verb} it?`
+    }else{
+        const randomSupplies = supplies.filter(sply=>sply.type===supply && sply.found)
+        randomSupply = randomSupplies[Math.floor(Math.random()*randomSupplies.length)]
+        const storeIt = document.getElementById("inv")
+        storeIt.disabled = true
+        str =`You don't have any ${supply} in your inventory, but you look around and find a ${randomSupply.name}. Do you want to ${randomSupply.verb} it`
+    }
+    setPlayerActivity("foundSupplies")
+    setFoundItem(randomSupply)
+    typingFunction( "text", str, true)
+}
+
+const findSupplies = (player,playerActivity, setPlayerActivity, setFoundItem)=>{
+    if(playerActivity === ""){
+        setPlayerActivity("foundSupplies")
+        let randomSupplyArray = Math.random()*2>0 ?supplies.filter(supply=>supply.type==="food"):supplies.filter(supply=>supply.type==="medicine")
+        let randomFood=randomSupplyArray[Math.floor(Math.random()*randomSupplyArray.length)] 
+        console.log(randomFood)
+        setFoundItem(randomFood)
+        return`you find a ${randomFood.name}, your ${randomFood.affectedObj.affected} is at ${player[randomFood.affectedObj.affected]} out of ${randomFood.affectedObj.value}, would you like to ${randomFood.verb}?`
+    }
+}
+
+const handleSupply=(typingFunction, choice, supply, player,setPlayer, setPlayerActivity)=>{
+    setPlayerActivity("")
+    let str = ""
+    if(choice === "consume"){
+        const newSupplyArray = player.inventory.backpack[supply.type].filter(item=>item.name !==randomSupply.name)
+        setPlayer(prevPlayer=>({...prevPlayer, inventory:{...prevPlayer.inventory, backpack:{...prevPlayer.inventory.backpack, [supply.type]:newSupplyArray}}}))
+            let possibleLoss = player[supply.affectedObj.affected] - supply.loss < 0 ? 0 : player[supply.affectedObj.affected] - supply.loss
+            let possibleGain = player[supply.affectedObj.affected] + supply.benefit > supply.affectedObj.value ? supply.affectedObj.value : player[supply.affectedObj.affected] + supply.benefit
+            if(player[supply.affectedObj.affected] === supply.affectedObj.value){
+                setPlayer(prev=>({...prev, stamina:possibleLoss}))
+                str = `You don't need it, but you decide to ${supply.verb} the ${supply.name}anyway. ${supply.bad}. You lose ${supply.loss} ${supply.affectedObj.affected} points and now have ${possibleLoss} out of ${supply.affectedObj.value}.`
+            }else{
+                if(Math.floor(Math.random()*(supply.affectedObj.value+1))>player[supply.affectedObj.affected]){
+                    setPlayer(prev=>({...prev, [supply.affectedObj.affected]:possibleLoss}))
+                    if((player.life - supply.loss)<=0 && supply.type==="medicine"){
+                        let smartOrDumb
+                        if(player.life<85){
+                            smartOrDumb=`You're in need of a boost, but ${supply.verb}ing the ${supply.name} was a bad idea.`
+                        }else{
+                            smartOrDumb=`Maybe you should have saved the ${supply.name} for later, you didn't really need it.`
+                        }
+                        str=`${smartOrDumb} ${supply.bad} The pain is too much, you slowly wither away thinking about all the glory you could have won...
+                        ${supply.bad} The pain is too much, you slowly wither away thinking about all the glory you could have won...`
+                        setPlayerActivity("lost")
+                    }else{
+                        str = `You ${supply.verb} the ${supply.name}, ${supply.bad}. You lose ${supply.loss} ${supply.affectedObj.affected} points and now have ${possibleLoss} ${supply.affectedObj.affected} points out of ${supply.affectedObj.value}.`
+                    }
+                }else{
+                    setPlayer(prev=>({...prev, [supply.affectedObj.affected]:possibleGain}))
+                    str = `You ${supply.verb} the ${supply.name}, ${supply.benefit}. You gain ${supply.benefit} ${supply.affectedObj.affected} points and now have ${possibleGain} ${supply.affectedObj.affected} points out of ${supply.affectedObj.value}.`
+                }
+            }
+    }else if(choice === "leave"){
+        if(supply.found){
+            str = `You're smarter than you let on...`
+        }else{
+            str = `...you know you have an inventory right...we always get the bright ones...`
+        }
+    }else{
+        setPlayer(prev=>({...prev, inventory:{...prev.inventory, backpack:{...prev.inventory.backpack, [supply.type]:[...prev.inventory.backpack[supply.type],supply]}}}))
+        str = `Ok, it's in your inventory!`
+    }
+    typingFunction("text", str, true)
+}
+
+//functions for weaopshop, choosing a weapon to make/fight with, and making/fighting with the weapon. Except the weapon shop, all of these things are done by clicking weapons.
+
 const weaponShop = (typingFunction, player, setPlayer,playerActivity, setPlayerActivity)=>{
     setPlayerActivity("chooseWeapon")
     setPlayer(prev=>({...prev, inTheShop:{making:false, shopping:true}}))
     typingFunction("text", `You make your way through the woods to an old dilapilated shack. Inside is a gruff older man, a fire blazing behind him. "What do you want!?" He shouts.`, true)
 }
+
 const selectWeapon = (weapon, player, setPlayer, setPlayerActivity, typingFunction)=>{
     if(player.inTheShop.shopping || player.inTheShop.making ){
         if(player.inTheShop.shopping){
@@ -123,6 +204,7 @@ const selectWeapon = (weapon, player, setPlayer, setPlayerActivity, typingFuncti
             if(newPlayerLife >0){
                 typingFunction ("text",`...did you make this weapon yet?? ${monster.name} ${battleObject.monsterAttack} while you fumble for a weapon you don't have. You lose ${damageTaken} life points, leaving your life at ${player.life -10} Do you want to run away so you can make that weapon, or fight with one you actually have?`, true)
             }else{
+                setPlayerActivity("gameOver")
                 setPlayer(prevPlayer=>({...prevPlayer, isAlive:false}))
                 typingFunction ("text",`You reach for ${weapon.name} as if you went to the weapon shop and made it...but you didn't...${monster.name} ${monster.finishingMove}. ${monster.winPhrase} they bellow as you die. You died reaching for a weapon you don't even have...`, true)
             }
@@ -130,17 +212,20 @@ const selectWeapon = (weapon, player, setPlayer, setPlayerActivity, typingFuncti
         }
     }
 }
+
 const rescueRoyals = (typingFunction, player, setPlayer,playerActivity, setPlayerActivity)=>{
     if (playerActivity === ""){
+        console.log(player.hasKey)
         if(player.hasKey){
-            setPlayerActivity("complete")
-            typingFunction ("text",`You did it! You saved the day`, true, "complete")
+            setPlayerActivity("won")
+            typingFunction ("text",`You did it! You saved the day...What...were you expecting a reward? LOL. GAURD!`, true)
         }else{
             setPlayerActivity("checking")
             typingFunction ("text",`You Don't have the Key! Did you Fight the Dragon Yet?!?! Why are you here??? BE GONE!`, true, "checking")
         }
     }
 }
+
 const fightDragon = (typingFunction, player, setPlayer,playerActivity, setPlayerActivity, setFoundItem)=>{
     if (playerActivity === "" || playerActivity === "dragon"){
         if(playerActivity !== "dragon"){
@@ -167,14 +252,15 @@ const fightDragon = (typingFunction, player, setPlayer,playerActivity, setPlayer
         }
     }
 }
+
 const wander = (typingFunction, player, setPlayer,playerActivity, setPlayerActivity, setFoundItem)=>{
     if (playerActivity === ""){
         if(!player.monsters.length > 0 ||player.stamina<2 ||player.life<20){
             if(player.life<100){
-                typingFunction ("text","You turn to the woods in search of aid and " + findMeds(player,setPlayer, setPlayerActivity, setFoundItem), true)
+                typingFunction ("text","You turn to the woods in search of aid and " + findSupplies(player,playerActivity, setPlayerActivity, setFoundItem), true)
             }
             else if(player.stamina<10){
-                typingFunction ("text", "You turn to the woods in search of sustainance and " + findFood(player,setPlayer, setPlayerActivity, setFoundItem), true)
+                typingFunction ("text", "You turn to the woods in search of sustainance and " + findSupplies(player,playerActivity, setPlayerActivity, setFoundItem), true)
             }else{
                 typingFunction("text", "it looks like you've fought all the monsters in the jungle, don't be chicken, it's time to fight the dragon or save the royal family!", true)
             }
@@ -183,7 +269,7 @@ const wander = (typingFunction, player, setPlayer,playerActivity, setPlayerActiv
             let randomNumber =  Math.floor((Math.random()*11)) 
             let enemies
             let randomEnemy
-            if(randomNumber  ){
+            if(!randomNumber  ){
                 setPlayerActivity("encounter")
                 enemies = player.monsters.filter(monster=>monster.level === player.level)
                 //a random enemy is selected and displayed from the previously create enemy array
@@ -197,27 +283,18 @@ const wander = (typingFunction, player, setPlayer,playerActivity, setPlayerActiv
                 }
                 setPlayer(prevPlayer=>({...prevPlayer, fighting:randomEnemy}))
                 typingFunction("text", `Oh no, ${randomEnemy.name} is blocking your way! ${randomEnemy.name} is a level ${randomEnemy.level} enemy with ${randomEnemy.life} life points. Think you can take 'em?`, true)
-            }else  if(randomNumber > 7){
+            }else  if(randomNumber > 11){
                 setPlayerActivity("")
                 //20% chance of nothing
                 typingFunction("text","Nothing here, better continue on!", true)
             }else{
-                //another random number to choose between food and medicine triggers this is 50/50
-                if(Math.floor(Math.random() * 11)<6){ 
-                    setPlayerActivity("foundSupplies")
-                    let randomFood = foodOptions[Math.floor(Math.random()*foodOptions.length)] 
-                    setFoundItem(randomFood)
-                    typingFunction ("text", `you find a ${randomFood.name}, your stamina is at ${player.stamina} out of 10, do you want to eat it?`, true)
-                }else{
-                    setPlayerActivity("foundSupplies")
-                    let randomMed = medOptions[Math.floor(Math.random()*medOptions.length)] 
-                    setFoundItem(randomMed)
-                    typingFunction ("text", `you find a ${randomMed.name}, your life is at ${player.life} out of 10o, do you want to use it?`, true)
-                }
+                typingFunction("text", findSupplies(player,playerActivity, setPlayerActivity, setFoundItem), true)
+                    
             }   
         }
     }
 }
-const obj = {checkInv, rescueRoyals, fightDragon, wander, weaponShop, selectWeapon}
+
+const obj = {checkInv,checkSupplies,handleSupply,  rescueRoyals, fightDragon, wander, weaponShop, selectWeapon}
 
 export {obj}

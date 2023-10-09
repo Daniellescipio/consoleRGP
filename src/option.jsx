@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react"
-import { PlayerContext } from "../logic/usePlayer"
-import { TypingContext } from "../logic/useTyping"
+import { PlayerContext } from "./logic/usePlayer"
+import { TypingContext } from "./logic/useTyping"
 function Option({img, alt, hover, clickFunction, setFoundItem}){
     const {player, setPlayer, playerActivity, setPlayerActivity} = useContext(PlayerContext)
     const {setText, typingFunction, typingBool} = useContext(TypingContext)

@@ -23,7 +23,7 @@ function PlayerProvider(props){
         //triggers flee from monster fight
         isRunning : false,
         //allows player to/bars player from dragon fight
-        haskey : false,
+        hasKey : true,
         //triggers dragon fight
         fightingDragon: false,
         //for shopping in and creating a weapon in the weapons shop

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
-import { Option } from './options/option'
+import { Option } from './option'
 import crown from "./assets/crown.png"
 import dragon from "./assets/dragon.png"
 import food from "./assets/food.png"
@@ -11,10 +11,10 @@ import { obj } from './logic/functions'
 import { PlayerContext } from './logic/usePlayer'
 import { TypingContext } from './logic/useTyping'
 import { fightMonster, runFromMonster, monsters } from './data/monsters'
-import {handleSupply, checkSupplies } from './data/foodandMeds'
 import { WeaponDiv, weapons } from './data/weapons'
 
 function App() {
+  const [timeOutId , setTimeOutId] = useState()
   const {player, setPlayer, playerActivity, setPlayerActivity} = useContext(PlayerContext)
   const {text, setText, setAddText, addText, intro, setIntro, introTracker, setIntroTracker, introOptions, typingFunction} = useContext(TypingContext)
   const [foundItem, setFoundItem] = useState("")
@@ -32,7 +32,7 @@ function App() {
     img:food, 
     alt:"food", 
     hover:"Eat Food",
-    function:checkSupplies 
+    function:obj.checkSupplies 
   },{
     img:inventory, 
     alt:"inventory", 
@@ -42,7 +42,7 @@ function App() {
     img:pill, 
     alt:"pill", 
     hover:"Take medicine",
-    function:checkSupplies
+    function:obj.checkSupplies
   },{
     img:weaponImg, 
     alt:"weaponShop", 
@@ -61,7 +61,12 @@ function App() {
       const imageContainers = document.getElementsByClassName("imageContainer")
       const arr = [...divsToFilter]
       if(playerActivity !== ""){
-        arr.map(div=>div.getAttribute("id") === playerActivity ? div.style.display = "flex" : div.style.display = "none" )
+        if(playerActivity === "won" || "lost"||"gameOver"){
+          let timer = playerActivity === "gameOver" ? 20000 : 10000
+          setTimeOutId(setTimeout(quitGame, timer))
+        }
+          arr.map(div=>div.getAttribute("id") === playerActivity ? div.style.display = "flex" : div.style.display = "none" )
+        
       }else{
         arr.map(div=>div.style.display = "none" )
         gameOptions.style.display = "flex"
@@ -72,6 +77,7 @@ function App() {
   },[playerActivity, intro])
 
   const playGame = ()=>{
+    timeOutId && clearTimeout(timeOutId)
     const button=document.getElementById("playButton")
     const cont = document.getElementById("continue")
     const quit = document.getElementById("quit")
@@ -153,9 +159,9 @@ function App() {
           <button id = "fight" onClick={()=>{typingFunction("text", fightMonster(player, setPlayer, setPlayerActivity), true)}}>Fight</button>
         </div>
         <div id= "foundSupplies" className = "optionsRow">
-          <button className="mult" id = "inv" onClick={()=>handleSupply(typingFunction,"inventory",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Store It</button>
-          <button className="mult" id = "consume" onClick={()=>handleSupply(typingFunction,"consume",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Eat/Use It</button>
-          <button className="mult" id = "leave" onClick={()=>handleSupply(typingFunction,"leave",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Leave It</button>
+          <button className="mult" id = "inv" onClick={()=>obj.handleSupply(typingFunction,"inventory",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Store It</button>
+          <button className="mult" id = "consume" onClick={()=>obj.handleSupply(typingFunction,"consume",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Eat/Use It</button>
+          <button className="mult" id = "leave" onClick={()=>obj.handleSupply(typingFunction,"leave",foundItem, player, setPlayer, setPlayerActivity, setFoundItem)}>Leave It</button>
         </div>
         {/* <div id= "medOptions" className = "optionsRow">
           <button id = "run" onClick={()=>{typingFunction(runFromMonster(player, setPlayer, setPlayerActivity), true)}}>Run</button>
