@@ -5,9 +5,9 @@ import wand from "../assets/wand.png"
 import swordimg from "../assets/sword.png"
 import keyimg from "../assets/key.png"
 import { PlayerContext } from "../logic/usePlayer"
-import { useContext, useEffect, useState } from "react"
+import { useContext} from "react"
 import { TypingContext } from "../logic/useTyping"
-import { obj } from "../logic/functions"
+import { FunctionContext } from "../logic/functions"
 const weaponPieces = {
     wood: {
         id:1,
@@ -136,6 +136,7 @@ const weapons ={
 function WeaponDiv({}){
     const {player, playerActivity, setPlayer, setPlayerActivity} = useContext(PlayerContext)
     const {typingFunction, setAddText} = useContext(TypingContext)
+    const {selectWeapon} = useContext(FunctionContext)
 
     const handleHover = (bool, weapon)=>{
         if(bool){
@@ -145,7 +146,7 @@ function WeaponDiv({}){
         }
     }
     const weaponsArray = [weapons.axe,weapons.hands,weapons.sword,weapons.magicWand, weapons.laserGun]
-    const images = weaponsArray.map((weapon, i)=><img onMouseEnter={()=>handleHover(true, weapon)} onMouseLeave={()=>handleHover(false, weapon)} onClick = {()=>obj.selectWeapon(weapon, player, setPlayer, setPlayerActivity, typingFunction)}className = "mult" src = {weapon.img} alt={weapon.name} key = {i}/>)
+    const images = weaponsArray.map((weapon, i)=><img onMouseEnter={()=>handleHover(true, weapon)} onMouseLeave={()=>handleHover(false, weapon)} onClick = {()=>selectWeapon(weapon)}className = "mult" src = {weapon.img} alt={weapon.name} key = {i}/>)
     return(
        <>
        {images}

@@ -49,6 +49,7 @@ function TypingProvider(props){
               optionsDiv.style.display = "flex"
               cont.style.display = "none"
               setIntro(false)
+              setPlayerActivity("ready")
           }else if(introTracker !==1){
               cont.disabled = false
           }else{

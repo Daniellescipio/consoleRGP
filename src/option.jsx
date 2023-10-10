@@ -27,11 +27,9 @@ function Option({img, alt, hover, clickFunction, setFoundItem}){
     }
 
     return(
-        <div className = "imageContainer" onClick= {()=>clickFunction(typingFunction,player, setPlayer,playerActivity, setPlayerActivity, setFoundItem, alt==="pill" ? "medicine" : alt)} onMouseEnter={()=>handleHover(true)} onMouseLeave={()=>handleHover(false)}>
+        <div className = "imageContainer" onClick= {()=>clickFunction(setFoundItem, alt==="pill" ? "medicine" : alt)} onMouseEnter={()=>handleHover(true)} onMouseLeave={()=>handleHover(false)}>
             <img src={img}  alt={alt}/>
         </div>
     )
 }
-//
-//player, supply, setPlayerActivity, setPlayer,setFoundItem
 export {Option}
