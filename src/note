@@ -1,15 +1,23 @@
-I think we should work on the fight sequence next.
-this will involve...
-creating choose a weapon function
-battle :
-choose weapon. 
-battle diaglogue :player hits or misses, monster hit or misses
-damage dialogue:damage for both moster and player will be some calculation factoring in monster and weapon level. 
-player will be shown stamina and life level and given a choice to keep fighting or run...
 
-After this we still need to program 
+Must To do
 figthing the dragon, 
-taking medicine, 
-the weapons shop
+rescuing royals
 
-food function needs to be debugged...
+later to dos
+fix qnty in inventory display. right now multiples show multiple times
+
+
+
+activities for player
+
+ready - ready to do something else/most likely main menu
+checking - checking inventory/trying to rescue royals without key
+foundSupplies - wandering and find a supply/click foods or meds
+"" --doing nothing?
+lost --lose via meds or food
+chooseWeapon -- opens weapons shop
+complete --finishes in the weapons shop/fighting monster
+gameOver --lose via fight
+encounter --starts a fight with monsters or dragon(with or without appropriate weapon)
+won-
+dragon - fighting dragon

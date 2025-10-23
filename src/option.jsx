@@ -17,7 +17,7 @@ function Option({img, alt, hover, clickFunction, setFoundItem}){
         }
     },[typingBool])
     const handleHover = (bool)=>{
-        if (playerActivity === ""){
+        if (playerActivity === "ready"){
             if(bool){
                 setText(hover)
             }else{

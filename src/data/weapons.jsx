@@ -12,70 +12,83 @@ const weaponPieces = {
     wood: {
         id:1,
         name : 'piece of wood',
+        for:"Axe",
         description: 'a piece of wood, good for carving into weapons',
     },
     metal:{
         id:2,
         name : 'piece of metal',
+        for:"Axe",
         description: 'a piece of metal, good for molding into a weapon'
     }, 
     blade:{
         id:3,
         name : 'blade',
+        for:"Sword",
         description: 'the pointy part of a sword'
     },
     pommel:{
         id:4,
         name : 'pommel',
+        for:"Sword",
         description: `so you don't cut yourself holding a sword`
     },
     crossgaurd:{
         id:5,
         name : 'crossgaurd',
+        for:"Sword",
         description: `idk, but the Searches said you need one to make a sword`
     },
     action:{
         id:6,
         name : 'action',
+        for:"Laser Gun",
         description: 'The part that make the gun GO'
     },
     stock: {
         id:7,
         name : 'stock',
+        for:"Laser Gun",
         description:`the handle of your gun`
     },
     barrel:{
         id:8,
         name : 'barrel',
+        for:"Laser Gun",
         description: 'Where the laser will come from'
     },
     laser: {
         id:9,
         name : 'laser',
+        for:"Laser Gun",
         description:`a laser, because this isn't just any gun...`
     },
     holly: {
         id:10,
         name : 'holly',
+        for:"Magic Wand",
         description:`the difference between stick and wand...`
     },
     pheonixFeather: {
         id:11,
         name : 'pheonix Feather',
+        for:"Magic Wand",
         description:`Magic bird feather for the magic core of your magic wand`
     },
     garrickOllivander:{
         id:12,
         name : 'Garrick Ollivander',
+        for:"Magic Wand",
         description: "Unless you know how to make wands your gonna need this dude."
     },
     magic:{
         id:13,
         name : 'magic',
+        for:"Magic Wand",
         description: `A little pixie dust so you can work the wand when you need to`
     } ,
     key:{
-        id:13,
+        id:14,
         name : "a key",
         defintion : "It's no weapon, but it'll get you the girl!(and the rest of her family)",
     }

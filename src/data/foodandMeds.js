@@ -1,14 +1,24 @@
 const supply = class{
     constructor(type, affectedObj, name, benefit, loss, verb, good, bad, found) {
+        //string : food or medicine
         this.type = type;
-        this.name = name;
-        this.benefit = benefit;
-        this.loss = loss;
-        this.verb = verb;
-        this.good = good;
-        this.bad = bad;
-        this.qnty = 0;
+        //boolean: sets up life or stamina object
         this.affectedObj = affectedObj ?{affected:"life", value:100}:{affected:"stamina", value:10};
+        //string
+        this.name = name;
+        //number :increase stamina or life
+        this.benefit = benefit;
+        //number :decrease stamina or life
+        this.loss = loss;
+        //string: makes typing more dynamic : how this object should be used
+        this.verb = verb;
+        //string: makes typing more dynamic : Positive effect of object
+        this.good = good;
+        //string: makes typing more dynamic : Negative effect of object
+        this.bad = bad;
+        //number: how many we have (not sure this works properly)
+        this.qnty = 0;
+        //boolean: user can randomly find objects or look for them. Found objects are less haremful
         this.found = found;
     }
 }
@@ -18,7 +28,7 @@ const supplies = [
     new supply("food", false, "pile of garbage", 2, 8,"eat", "Gross, I guess something is better than nothing!", "You can't stop vomitting.",true), 
     new supply("food", false, "pig roasting over a fire",10, 10,"eat",  "Finders keepers losers weepers, what a find!", "The owner caught you touching their pig and chased you away.",true),
     new supply("medicine",true, "lake", 20, 40,"drink", "Just what you needed, the refreshing drink rejuvenates you.", "You get a virus from drinking contaminated water.",true),
-    new supply("medicine",true, "man claiming to be a doctor","trust", 50, 50, "He patches you up and you feel better than ever.", "He steals your liver.",true), 
+    new supply("medicine",true, "man claiming to be a doctor", 50, 50,"trust", "He patches you up and you feel better than ever.", "He steals your liver.",true), 
     new supply("medicine",true, "puddle of mud", 10, 30, "use", "The mud seals your wounds and your able to move a little easier.", "You get an infection from putting dirt in your wounds.",true), 
     new supply("medicine",true, "needle and thread", 30, 40, "use","You manage to close the worst of your wounds, good job doc!", "You're not a doctor. You make matters much worse.",true),
 

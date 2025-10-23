@@ -1,3 +1,6 @@
+.hide{
+    display: none;
+}
 body{
     font-family: 'Press Start 2P', cursive;
 }
@@ -82,3 +85,34 @@ img:hover{
 .mult{
     margin: 0 !important;
  }
+td,th{
+    border: 1px solid;
+    height: 10px;
+    width: 25%;
+    font-size: 75%;
+    z-index: 2;
+    cursor: pointer;
+    position: relative;
+}
+.inv{
+    width: 435px;
+    margin: auto;
+    background-color: grey;
+    font-size: 11px;
+}
+caption{
+    font-size: 75%;
+}
+#details {
+    display: none;
+    position: absolute;
+    top: 2em;
+    left: 5em;
+    text-align: center;
+    border: 5px dotted;
+    background-color: #808080bd;
+    width: 300px;
+    background-color: #282525;
+    z-index: 1;
+    color: white;
+}
