@@ -10,7 +10,7 @@ const FunctionContext = React.createContext()
 
 function FunctionProvider(props){
     const {typingFunction} = useContext(TypingContext)
-    const {setPlayer, setPlayerActivity, player, playerActivity} = useContext(PlayerContext)
+    const {setPlayer, setPlayerActivity, player, playerActivity, fightObj, setFightObj} = useContext(PlayerContext)
     //displays player life, stamina, food, medicine, weapon pieces, and weapons
     const checkInv = (bool)=>{
         //because the inventory table is already built in App.jsx, we just change player activity so that App.jsx can hide the inventory based on what the player is doing, this makes it easier to hide the inventory table for other actions. 
@@ -83,6 +83,7 @@ function FunctionProvider(props){
         //in most cases, our player has the choice to consume, leave, or store the item...
         //if they choose to use or eat the item...
         if(choice === "consume"){
+            let activity
             //if the supply is in our inventory array it will be filtered out, if it's not in our inventory, our inventory should not change/ be equal to newsupplyArray
             const newSupplyArray = player.inventory.backpack[supply.type].filter(item=>item.name !==supply.name)
             //replace whatever was in the inventory with the filtered array
@@ -95,29 +96,19 @@ function FunctionProvider(props){
                 let possibleGain = player[supply.affectedObj.affected] + supply.benefit > supply.affectedObj.value ? supply.affectedObj.value : player[supply.affectedObj.affected] + supply.benefit
                 //if the players stamina or life is at 100%
                 if(player[supply.affectedObj.affected] === supply.affectedObj.value){
-                    console.log(player[supply.affectedObj.affected], supply.affectedObj.value)
                     //they lose life/stammina because well the didn't need it.
                     setPlayer(prev=>({...prev, [supply.affectedObj.affected]:possibleLoss}))
                     str = `You don't need it, but you decide to ${supply.verb} the ${supply.name} anyway. ${supply.bad}. You lose ${supply.loss} ${supply.affectedObj.affected} points and now have ${possibleLoss} out of ${supply.affectedObj.value}.`
                 }else{
-                    //otherwise there is a 2/5 chance for the item to be in their favor 
+                    //otherwise there is a 4/5 chance for the item to be in their favor 
                     //the first condition is not in their favor
-                    if(Math.round(Math.random()*(5))<2){
+                    if(Math.round(Math.random()*5)<1){
                         //set the player with the loss...
                         setPlayer(prev=>({...prev, [supply.affectedObj.affected]:possibleLoss}))
-                        //if it is a medicen and their life would be less than 0 after the negative affect, the lose the game
+                        //if it is a medicine and their life would be less than 0 after the negative affect, they lose the game
                         if((player[supply.affectedObj.affected] - supply.loss)<=0 && supply.type==="medicine"){
-                            let smartOrDumb
-                            const val = supply.affectedObj.affected === "life" ? 85 : 8
-                            if(player[supply.affectedObj.affected]<val){
-                                smartOrDumb=`You're in need of a boost, ${player.name}, but ${supply.verb}ing the ${supply.name} was a bad idea.`
-                            }else{
-                                smartOrDumb=`Maybe you should have saved the ${supply.name} for later, ${player.name}, you didn't really need it.`
-                            }
-                            str=`${smartOrDumb} ${supply.bad} The pain is too much, you slowly wither away thinking about all the glory you could have won...
-                            ${supply.bad} The pain is too much, you slowly wither away thinking about all the glory you could have won...`
-                            setTimeout(setPlayerActivity("lost"),1000)
-                            
+                            str=`You're in need of a boost, ${player.name}, but ${supply.verb}ing the ${supply.name} was a bad idea. ${supply.bad} The pain is too much, you slowly wither away thinking about all the glory you could have won...`
+            
                         //otherwise they still lose the points, but not the game
                         }else{
                             str = `You ${supply.verb} the ${supply.name}, ${supply.bad}. You lose ${supply.loss} ${supply.affectedObj.affected} points and now have ${possibleLoss} ${supply.affectedObj.affected} points out of ${supply.affectedObj.value}.`
@@ -142,7 +133,6 @@ function FunctionProvider(props){
         setFoundItem("")
         typingFunction("text", str, true)
     }
-
     //functions for weaopshop, choosing a weapon to make/fight with, and making/fighting with the weapon. Except the weapon shop, all of these things are done by clicking weapons.
     //opens/initiates the weapons shop
     const weaponShop = ()=>{
@@ -150,139 +140,205 @@ function FunctionProvider(props){
         setPlayer(prev=>({...prev, inTheShop:{making:false, shopping:true}}))
         typingFunction("text", `Through the woods is a dilapilated shack. Inside a old man smiles, "I've been expecting you, ${player.name}." ...How does he know your name...?(Click a weapon)`, true)
     }
+//shopping either tells you you already have the weapon or what you need to make it
+    const shopping = (weapon)=>{
+        //the weapon they clicked is already in their inventory
+        //function is over, but player is still in the shop shoppping, so no state change
+        if(player.inventory.weapons.findIndex(wpn=>wpn.name===weapon.name)>=0){
+            typingFunction("text",`you already have this weapon.`, true)
+        //starts this function over but in the making section.
+        }else{
+            //weapons are "your xyx" so we chop off the your part for just xyz
+            const weaponName = weapon.name.split(" ")[0]
+            typingFunction("text",`you need ${weapon.pieces.map((piece,i)=>`${i===weapon.pieces.length-1? " and":" "} ${piece.name}`)} to make a ${weapon.name}. Click the weapon again to make it.`, true)
+            setPlayer(prev=>({...prev, inTheShop:{shopping:false, making:true}}))
+        }
+    }
 
+    const makeWeapon = (weapon)=>{
+        //this function is the only way for a player to level up!! (we will save progress here...)
+        //create an array of ids for the pieces needs for easy comparison
+        const neededPieces = weapon.pieces.map(piece=>piece.id)
+        //using that id array, filter our all the pieces in the players inventory that do not match any of those ids.
+        //will use this to set the state of our player's remaining weapon pieces after the weapon is "made"
+        const remaining = player.inventory.pieces.filter(piece=>!neededPieces.includes(piece.id))
+        //using that ID array filter the pieces out of the player inventory that match the ids. These peices are needed to make the weapon.
+        const removed = player.inventory.pieces.filter(piece=>neededPieces.includes(piece.id))
+        //the players current weapons array looks something like this [1,x,x,x,x] for display purposes
+        //we copy it to avoid manipulating state improperly
+        const newWeapons = [...player.inventory.weapons]
+        //the player level should === the index of the x we are trying to replace
+        //so when we are level 1, we want to get rid of the first x and add a level 2 weapon before leveling up the player
+        //this means the players level === the index of the weapon we need to replace.
+        //so we can use the assignment operator to replace the x with the weapon we just 'made' 
+        newWeapons[player.level]=weapon
+        if(removed.length === weapon.pieces.length){
+            setPlayer(prev=>(
+                {...prev, 
+                    //remove player from shop
+                    inTheShop:{shopping:false, making:false},
+                    //set pieces with anything they have left, set the weapons array with the new weapon added
+                    inventory:{...prev.inventory, pieces:remaining, weapons:newWeapons},
+                    //increase player level +1 
+                    level:prev.level+1
+                }))
+            setPlayerActivity("complete")
+            typingFunction("text",`The old man grumbles something before disapperaing into the back for a few hours. He returns with ${weapon.name}... It's beautiful`, true, "complete")
+        }else{
+            typingFunction("text",`You don't have the pieces to make this weapon. Wander the jungle and fight monsters to gain pieces.`, true)
+            setPlayer(prev=>({...prev, inTheShop:{shopping:false, making:false}}))
+        }
+    }
+    const getBattleObject = (weapon, monster)=>{
+
+        const battleObj={}
+
+        let possibleHAs = weapon.attack.filter((attack)=>!fightObj.hero.attacks.includes(attack))
+        let possibleCPs = weapon.catchPhrase.filter((cp)=>!fightObj.hero.cps.includes(cp))
+        let possibleFMs = weapon.finishingMove.filter((fm)=>!fightObj.hero.fms.includes(fm))
+        let possibleMDs = monster.dodge.filter((dodge)=>!fightObj.opp.dodges.includes(dodge))
+        let possibleMHs = monster.hit.filter((hit)=>!fightObj.opp.hits.includes(hit))
+        let possibleMAs = monster.attack.filter((attack)=>!fightObj.opp.attacks.includes(attack))
+
+        let randomHA  = Math.floor(Math.random()*(possibleHAs.length-1))
+        let randomCP = Math.floor(Math.random()*(possibleCPs.length-1))
+        let randomFM = Math.floor(Math.random()*(possibleFMs.length-1))
+        let randomMD = Math.floor(Math.random()*(possibleMDs.length-1))
+        let randomMH = Math.floor(Math.random()*(possibleMHs.length-1))
+        let randomMA = Math.floor(Math.random()*(possibleMAs.length-1))
+  
+
+        const heroAttack = possibleHAs[randomHA]
+        battleObj.heroAttack = heroAttack
+        
+        const catchPhrase = possibleCPs[randomCP]
+        battleObj.heroCatchPhrase = catchPhrase
+     
+        const finishingMove = possibleFMs[randomFM]
+        battleObj.finishingMove = finishingMove
+
+        const monsterDodge = possibleMDs[randomMD]
+        battleObj.monsterDodge =monsterDodge
+
+        const monsterHit = possibleMHs[randomMH]
+        battleObj.monsterHit = monsterHit
+
+       
+        const monsterAttack = possibleMAs[randomMA]
+        battleObj.monsterAttack = monsterAttack
+
+        setFightObj((prev)=>{
+            return{
+                hero:{
+                    attacks:[...prev.hero.attacks,heroAttack], 
+                    cps:[...prev.hero.cps,catchPhrase], 
+                    fms:[...prev.hero.fms,finishingMove]
+                },
+                opp:{
+                    dodges:[...prev.opp.dodges,monsterDodge], 
+                    hits:[...prev.opp.hits,monsterHit], 
+                    attacks:[...prev.opp.attacks,monsterAttack]
+                }
+            }
+        })
+
+        return battleObj
+
+    }
+    const fight = (weapon)=>{
+
+        let playerDamage
+        let oppDamage
+        //additional text for user
+        let butAlso = ""
+        //this is set in the wander function so we know the monster we need for this function
+        const monster = player.fighting
+        //we check to see if the monster is the dragon
+        let dragon = monster.name === "the Fire Breathing Dragon" ? true:false
+        //there are a few options attached to each weapon/monster for the attacks, counters, and phrases, so we'll randomly grab one for each action we will need
+        const battleObject = getBattleObject(weapon, monster)
+        console.log(battleObject)
+        //if the weapon passed into the function is in the player inventory, i.e. they have the weapon they just clicked on
+        if(player.inventory.weapons.findIndex(wpn=>wpn.name === weapon.name)>=0){
+            //good weapon
+            if(weapon.DamageLevel === monster.level){
+                if(dragon){
+                    playerDamage = 50
+                    oppDamage = 0
+                    butAlso = `You wave your wand with all your might and shout ${weapon.catchPhrase}. This Dragon is no one-year-old cloaked in love. ${monster.name.toUpperCase()} ${battleObject.monsterHit}. ${monster.losePhrase} the dragon gasps as their eyes fall closed. \n Oh look, a Key!`
+                }else{
+                    //player deals damage(lvl1 :5-10, lvl2:10-20, lvl3:15-30, lvl4:20-40)(we use level*ten to avoid issues when they lose life points, monster lvl*10===monsterlife)
+                    playerDamage = Math.floor((Math.random() * (((monster.level*10) - (monster.level*5))+(monster.level*5))))
+                    //monster deals damage same ranges (monsters life is signifigantly less than players, so this is works out...)
+                    oppDamage = Math.floor((Math.random() * (((monster.level*10) - (monster.level*5)) + (monster.level*5))))
+                    butAlso = `They lose ${playerDamage} life points, but not before ${monster.name} ${battleObject.monsterAttack}. You lose ${oppDamage} life points.`
+                }
+            //bad weapon
+            }else{
+                //player deals damage between 0 and monster level (1-4)
+                playerDamage = Math.floor((Math.random() * monster.level))
+                //monster deals damage(lvl1 :10-20, lvl2:20-40, lvl3:30-60, lvl4:40-80)
+                oppDamage = (Math.floor((Math.random() * ((monster.level*20) - (monster.level*10)) + (monster.level*10)))+1)
+                butAlso = `What a weak attack, ${monster.name} is offended, they barely lose ${playerDamage} life points. In return, ${monster.name} ${battleObject.monsterAttack}. You lose ${oppDamage} life points.`
+            }
+            //to avoid negative numbers evaluate before setting
+            const newPlayerLife = player.life - oppDamage < 0 ? 0 : player.life - oppDamage
+            const newMonsterLife = monster.life - playerDamage < 0 ? 0 : monster.life - playerDamage
+               // if our player has no more life
+                if(newPlayerLife <= 0 ){
+                    typingFunction( "text",`You're on your last leg, but mama didn't raise a quitter. You ${battleObject.heroAttack}, ${monster.name}. ${monster.name[0].toUpperCase()} ${battleObject.monsterDodge}. Then, ${monster.name} ${monster.finishingMove} It's game over. ${monster.winPhrase} they sneer standing over you.`, true, "lost")
+                //monster is still alive
+                }else if(newMonsterLife > 0 ){
+                    setPlayerActivity("encounter")
+                    setPlayer(prevPLayer=>({...prevPLayer, fighting:{...prevPLayer.fighting, life: newMonsterLife}, life:newPlayerLife}))
+                    typingFunction ("text", `You ${battleObject.heroAttack}, ${monster.name}. ${monster.name.toUpperCase()} ${battleObject.monsterHit}. ${butAlso} Your life is still at ${newPlayerLife} points and ${monster.name} has ${newMonsterLife} points left. Will you turn and run or continue to fight?`, true)
+                //monster is defeated
+                }else if(newMonsterLife <= 0 ){
+                    let newWeaponPiece 
+                    // get the correct weapons piece from our monster by matching the number on prizeForDefeat to the weaponId
+                    for(const key in weaponPieces){
+                        if(weaponPieces[key].id===monster.prizeForDefeat){
+                            newWeaponPiece = weaponPieces[key]
+                        }
+                    }
+                    //set player with new weapons piece and filtered monster arry
+                    setPlayer(prevPlayer=>({...prevPlayer, inventory:{...prevPlayer.inventory, pieces:[...prevPlayer.inventory.pieces, newWeaponPiece]}, fighting:false, monsters:player.monsters.filter(monster=>monster.name !== player.fighting.name)}))
+                    if(dragon){
+                        setPlayer(prevPlayer=>({...prevPlayer,hasKey:true }))
+                        typingFunction ("text",butAlso, true, "complete")
+                    }else{
+                        setPlayerActivity("complete")
+                        typingFunction ("text",`You can sense this fight is coming to an end. "Any last Words?" you demand as you stand over ${monster.name}. "${monster.losePhrase}" they shout. You use ${weapon.name} to ${battleObject.finishingMove} ${monster.name}, This fight is over. As the dust settles, you see a ${newWeaponPiece.name} lying on the ground. Maybe you can use it in the weapons shop...`, true, "complete")
+                    }
+                }
+        //the weapon is not in our inventory
+        }else{
+            setPlayerActivity("encounter")
+            const damageTaken = 10 * monster.level
+            const newPlayerLife = player.life - damageTaken <0 ? 0 : player.life-damageTaken
+            setPlayer(prevPlayer=>({...prevPlayer, life:newPlayerLife}))
+            if(newPlayerLife >0){
+                typingFunction ("text",`...did you make this weapon yet?? ${monster.name} ${battleObject.monsterAttack} while you fumble for a weapon you don't have. You lose ${damageTaken} life points, leaving your life at ${player.life -10} Do you want to run away so you can make that weapon, or fight with one you actually have?`, true)
+            }else{
+                setPlayerActivity("gameOver")
+                setPlayer(prevPlayer=>({...prevPlayer, isAlive:false}))
+                typingFunction ("text",`You reach for ${weapon.name} as if you went to the weapon shop and made it...but you didn't...${monster.name} ${monster.finishingMove}. ${monster.winPhrase} they bellow as you die. You died reaching for a weapon you don't even have...awkward`, true)
+            }
+
+        }
+    }
     const selectWeapon = (weapon)=>{
         //the shop is open and the user has the option to click a weapon to learn more/make it
         if(player.inTheShop.shopping || player.inTheShop.making ){
             if(player.inTheShop.shopping){
-                //the weapon they clicked is already in their inventory
-                if(player.inventory.weapons.findIndex(wpn=>wpn.name===weapon.name)>=0){
-                    typingFunction("text",`you already have this weapon.`, true)
-                //starts this function over but in the making section.
-                }else{
-                    typingFunction("text",`you need ${weapon.pieces.map((piece,i)=>`${i===weapon.pieces.length-1? " and":" "} ${piece.name}`)} to make a ${weapon.name}. Click the weapon again to make it.`, true)
-                    setPlayer(prev=>({...prev, inTheShop:{shopping:false, making:true}}))
-                }
+                shopping(weapon)
             //making the weapon
             }else{
-                //map over the pieces needed to make the weapon returning just their ids
-                const neededPieces = weapon.pieces.map(piece=>piece.id)
-                //using that id array, filter our all the pieces in the players inventory that do not match any of those ids.
-                //this means those pieces are for another weapon and should remain
-                const remaining = player.inventory.pieces.filter(piece=>!neededPieces.includes(piece.id))
-                //using that ID array filter the pieces out of the player inventory that match the ids. These peices are needed to make the weapon.
-                const removed = player.inventory.pieces.filter(piece=>neededPieces.includes(piece.id))
-                //the players current weapons array looks something like this [1,x,x,x,x] for display purposes
-                //we copy it to avoid manipulating state improperly
-                const newWeapons = [...player.inventory.weapons]
-                //the player level should be one less than the x we are trying to replace
-                //so when we are level 1, we want to get rid of the second x and add a level 2 weapon before leveling up the player
-                //this means the players level === the index of the weapon we need to replace.
-                //so we use the assignment operator to replace the x with the weapon we just 'made' 
-                newWeapons[player.level]=weapon
-                if(removed.length === weapon.pieces.length){
-                    setPlayer(prev=>({...prev, inTheShop:{shopping:false, making:false},inventory:{...prev.inventory, pieces:remaining, weapons:newWeapons}, level:prev.level+1}))
-                   // setPlayer(prev=>({...prev, level:prev.level+1}))
-                    setPlayerActivity("complete")
-                    typingFunction("text",`The old man grumbles something before disapperaing into the back for a few hours. He returns with ${weapon.name}... It's beautiful`, true, "complete")
-                }else{
-                    typingFunction("text",`You don't have the pieces to make this weapon. Wander the jungle and fight monsters to gain pieces.`, true)
-                }
-
+                makeWeapon(weapon)
             }
         //a fight
         }else{
-            let playerDamage
-            let oppDamage
-            //additional text for user
-            let butAlso = ""
-            //this is set in the wander function so we know the monster we need for this functions
-            const monster = player.fighting
-            //we check to see if the monster is the dragon
-            let dragon = monster.name === "the Fire Breathing Dragon" ? true:false
-            //there are a few options attached to each weapon/monster for the attacks, counters, and phrases, so we'll randomly grab one for each action we will need
-            const battleObject = {    
-                //the hero's first move   
-                heroAttack: weapon.attack[Math.floor(Math.random()*weapon.attack.length)],
-                //the finishing phrase for the weapon
-                heroCatchPhrase: weapon.catchPhrase[Math.floor(Math.random()*weapon.catchPhrase.length)],
-                //the weapons finishing move
-                heroFinishingMove: weapon.finishingMove[Math.floor(Math.random()*weapon.finishingMove.length)],
-                //if the monster manages to dodge
-                monsterDodge: monster.dodge[Math.floor(Math.random()*monster.dodge.length)],
-                //if the monster gets hit
-                monsterHit: monster.hit[Math.floor(Math.random()*monster.hit.length)],
-                //monster attack(always atleast 1 per fight)
-                monsterAttack: monster.attack[Math.floor(Math.random()*monster.attack.length)],
-            }
-            //if the weapon passed into the function is in the player inventory, i.e. they have the weapon they just clicked on
-            if(player.inventory.weapons.findIndex(wpn=>wpn.name === weapon.name)>=0){
-                //the weapon that was passed in has a higher level property than the monster. i.e. the player chose the weapon on the correct level
-                if(weapon.DamageLevel > monster.level){
-                    //the damage done by the player is a random number between the weapons damagelevel and the monster level... 
-                    playerDamage = Math.floor((Math.random() * (((weapon.DamageLevel*10)-(monster.level*10)) + (monster.level*10))))
-                }else if(weapon.DamageLevel === monster.level){
-                    if(dragon){
-                        playerDamage = 50
-                        oppDamage = 0
-                        butAlso = `You wave your wand and with all your might and shout ${weapon.catchPhrase}. This Dragon is no one-year-old cloaked in love. ${monster.name.toUpperCase()} ${battleObject.monsterHit}. ${monster.losePhrase} the dragon gasps as their eyes fall closed. \n Oh look, a Key!`
-                    }else{
-                        playerDamage = Math.floor((Math.random() * (((monster.level*10) - (monster.level*10)/2)) + (monster.level*10)/2))
-                        oppDamage = Math.floor((Math.random() * ((((monster.level*10)/weapon.DamageLevel) - 5) + 5)))
-                        butAlso = `They lose ${playerDamage} life points, but not before ${monster.name} ${battleObject.monsterAttack}. You lose ${oppDamage} life points.`
-                    }
-
-                }else{
-                    playerDamage = Math.floor((Math.random() * monster.level))
-                    oppDamage = (Math.floor((Math.random() * ((monster.level*20) - (monster.level*10)) + (monster.level*10)))+1)
-                    butAlso = `but ${monster.name.toUpperCase()} is offended by your weak attack, they barely lose ${playerDamage} life points. In return, ${monster.name} ${battleObject.monsterAttack}. You lose ${oppDamage} life points.`
-                }
-                const newPlayerLife = player.life - oppDamage < 0 ? 0 : player.life - oppDamage
-                const newMonsterLife = monster.life - playerDamage < 0 ? 0 : monster.life - playerDamage
-                    if(newPlayerLife <= 0 ){
-                        setPlayerActivity("gameOver")
-                        setPlayer(prevPLayer=>({...prevPLayer, isAlive:false}))
-                        typingFunction( "text",`You're on your last leg, but mama didn't raise a quitter. You ${battleObject.heroAttack}, ${monster.name}. ${monster.name.toUpperCase()} ${battleObject.monsterDodge}. Then, ${monster.name} ${monster.finishingMove} It's game over. ${monster.winPhrase} they sneer standing over you.`, true)
-                    }else if(newMonsterLife > 0 ){
-                        setPlayerActivity("encounter")
-                        setPlayer(prevPLayer=>({...prevPLayer, fighting:{...prevPLayer.fighting, life: newMonsterLife}, life:newPlayerLife}))
-                        if(dragon){
-                            typingFunction ("text", butAlso, true)
-                        }else{
-                            typingFunction ("text", `You ${battleObject.heroAttack}, ${monster.name}. ${monster.name.toUpperCase()} ${battleObject.monsterHit}. ${butAlso} Your life is still at ${newPlayerLife} points and ${monster.name} has ${newMonsterLife} points left. Will you turn and run or continue to fight?`, true)
-                        }
-                    }else if(newMonsterLife <= 0 ){
-                        let newWeaponPiece 
-                        // weaponPieces.filter(piece=>piece.id===monster.prizeForDefeat)
-                        for(const key in weaponPieces){
-                            if(weaponPieces[key].id===monster.prizeForDefeat){
-                                newWeaponPiece = weaponPieces[key]
-                            }
-                        }
-                        const newMonsterArray = player.monsters.filter(monster=>monster.name !== player.fighting.name)
-                        setPlayerActivity("complete")
-                        setPlayer(prevPlayer=>({...prevPlayer, inventory:{...prevPlayer.inventory, pieces:[...prevPlayer.inventory.pieces, newWeaponPiece]}, fighting:false, monsters:newMonsterArray}))
-                        if(dragon){
-                            setPlayer(prevPlayer=>({...prevPlayer,hasKey:true }))
-                            typingFunction ("text",butAlso, true, "complete")
-                        }else{
-                            typingFunction ("text",`You can sense this fight is coming to an end. "Any last Words?" you demand as you stand over ${monster.name}. "${monster.losePhrase}" they shout. You use ${weapon.name} to ${battleObject.heroFinishingMove} ${monster.name}, This fight is over. As the dust settles, you see a ${newWeaponPiece.name} lying on the ground. Maybe you can use it in the weapons shop...`, true, "complete")
-                        }
-                    }
-            }else{
-                setPlayerActivity("encounter")
-                const damageTaken = 10 * monster.level
-                const newPlayerLife = player.life - damageTaken <0 ? 0 : player.life-damageTaken
-                setPlayer(prevPlayer=>({...prevPlayer, life:newPlayerLife}))
-                if(newPlayerLife >0){
-                    typingFunction ("text",`...did you make this weapon yet?? ${monster.name} ${battleObject.monsterAttack} while you fumble for a weapon you don't have. You lose ${damageTaken} life points, leaving your life at ${player.life -10} Do you want to run away so you can make that weapon, or fight with one you actually have?`, true)
-                }else{
-                    setPlayerActivity("gameOver")
-                    setPlayer(prevPlayer=>({...prevPlayer, isAlive:false}))
-                    typingFunction ("text",`You reach for ${weapon.name} as if you went to the weapon shop and made it...but you didn't...${monster.name} ${monster.finishingMove}. ${monster.winPhrase} they bellow as you die. You died reaching for a weapon you don't even have...`, true)
-                }
-
-            }
+            fight(weapon)
         }
     }
 
@@ -345,7 +401,7 @@ function FunctionProvider(props){
                 let randomNumber =  Math.floor((Math.random()*11)) 
                 let enemies
                 let randomEnemy
-                
+                console.log(randomNumber)
                 if(randomNumber<6){
                     setPlayerActivity("encounter")
                     enemies = player.monsters.filter(monster=>monster.level === player.level)

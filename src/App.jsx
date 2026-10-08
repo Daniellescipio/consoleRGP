@@ -137,6 +137,7 @@ function App() {
     intro && setIntroTracker(prev=>prev+1)
   }
   const quitGame = ()=>{
+    localStorage.clear()
     const cont = document.getElementById("continue")
     const quit = document.getElementById("quit")
     const button=document.getElementById("playButton")
@@ -206,7 +207,6 @@ function App() {
       </div> 
       <div id = "textbox">
         <button id = "playButton" onClick={playGame}> Play </button>
-        <button id = "continueButton" onClick={continueGame}>continue</button>
         <p> {text} </p>
         <p className="additionalText"> {addText} </p>
         <div id = "name">

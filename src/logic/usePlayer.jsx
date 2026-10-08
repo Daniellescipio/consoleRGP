@@ -6,9 +6,10 @@ const PlayerContext = React.createContext()
 
 
 function PlayerProvider(props){
+    const returningPlayer = localStorage.getItem("player")
     const [playerActivity, setPlayerActivity] =useState("") 
-    const [player, setPlayer] = useState({
-        name : "Danielle",
+    const [player, setPlayer] = useState(returningPlayer ? JSON.parse(returningPlayer):{
+        name : "",
         life : 100,
         stamina:10,
         inventory : {
@@ -37,7 +38,8 @@ function PlayerProvider(props){
         level : 1, 
         levelUp:false
     })
-
+    const [fightObj, setFightObj] = useState({hero:{cps:[],attacks:[], fms:[]}, opp:{dodges:[], hits:[], attacks:[]}})
+    
     useEffect(()=>{
         //the idea here is to let the game know the player is ready to level up if they haven't gon to the weapons shop yet.
         //get all the weapons 
@@ -52,7 +54,7 @@ function PlayerProvider(props){
         }, 0)
         //if they have all the peices, i.e. reducer equals the number of pieces
         if(pieceCheck === nextWeapon.pieces.length){
-            //set their levelup property to true, but don'e actually level them up. That can only be done in the weapons shop
+            //set their levelup property to true, but don't actually level them up. That can only be done in the weapons shop
             setPlayer(prev=>({...prev, levelUp:true}))
         }else{
             //just incase it was still true from the last time they were supposed to level up
@@ -60,9 +62,12 @@ function PlayerProvider(props){
         }
         //this should run everytime they get a new weapons piece
     }, [player.inventory.pieces])
-
+    //another useEffect to save our progress whenever we defeat a monster or make a weapon
+    useEffect(()=>{
+        localStorage.setItem("player", JSON.stringify(player))
+    },[player.monsters, player.level])
     return(
-        <PlayerContext.Provider value ={{player, setPlayer, playerActivity, setPlayerActivity}}>
+        <PlayerContext.Provider value ={{player, setPlayer, playerActivity, setPlayerActivity, fightObj, setFightObj}}>
             {props.children}
         </PlayerContext.Provider>
     )

@@ -17,7 +17,7 @@ const fireBreathingDragon= {
     finishingMove:"unlatches it's jaws and releases an inferno",
     winphrase:"RAH RAH, I'M A DUNGEON DRAGON!",
     losePhrase: "You're power is too great for me!",
-    prizeForDefeat: 13,   
+    prizeForDefeat: 14,   
 }
 const banditOne ={
     name : "the bandit",
